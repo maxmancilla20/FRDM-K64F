@@ -23,9 +23,7 @@ STATES NextStateF(void)
             NextState++; /*Go to the next stat*/
         }        
         g_ButtonPress = false; /*Reset ButtnPress*/
-    }
-
-    if ( g_ButtonPress_TWO)
+    } else if ( g_ButtonPress_TWO)
     {
         if(STATE_1 < NextState)/*Threshold to avoid move less than state 1*/
         {
@@ -33,6 +31,10 @@ STATES NextStateF(void)
         }
         
         g_ButtonPress_TWO = false; /*Reset ButtnPress*/
+    }
+    else
+    {
+        /*Do nothing*/
     }
     
     return NextState;
