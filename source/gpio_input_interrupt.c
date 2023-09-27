@@ -110,7 +110,14 @@ int main(void)
     GPIO_PinInit(BOARD_LED_GPIO_THREE, BOARD_LED_GPIO_PIN_THREE, &led_config);
 
     state = BlinkRed; /*Initial State*/
+    FIFO Task1 = {1, BlinkRed, 5};
+    FIFO Task2 = {0, BlinkRed, 5};
+    FIFO Task3 = {1, BlinkBlue, 10};
+    FIFO Task4 = {0, BlinkRed, 5};
+    FIFO Task5 = {1, BlinkPurple, 15};
+    FIFO Task6 = {0, BlinkRed, 5};
 
+    FIFO Tasks[] = {Task1, Task2, Task3, Task4, Task5, Task6};
     while (1)
     {  
         if(__LONG_MAX__ > Counter) 

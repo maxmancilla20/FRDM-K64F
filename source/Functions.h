@@ -69,6 +69,14 @@ typedef enum /*Variable used to select states.*/
     STATE_6
 }STATES;
 
+typedef struct _FIFO
+{
+    uint8_t IsActive;
+    void (*state)();
+    uint8_t Time;
+}FIFO;
+
+
 /*Function prototypes*/
 STATES NextStateF(void);
 void StateSelect(STATES);
