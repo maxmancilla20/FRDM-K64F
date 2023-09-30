@@ -69,16 +69,16 @@ typedef enum /*Variable used to select states.*/
     STATE_6
 }STATES;
 
-typedef struct _FIFO
+typedef struct
 {
     uint8_t IsActive;
     void (*state)();
-    uint8_t Time;
+    uint16_t Time;
+    STATES TaskNum;
 }FIFO;
 
 
 /*Function prototypes*/
-STATES NextStateF(void);
 void StateSelect(STATES);
 void BlinkRed(void);
 void BlinkGreen(void);
@@ -86,5 +86,7 @@ void BlinkBlue(void);
 void BlinkYellow(void);
 void BlinkLightBlue(void);
 void BlinkPurple(void);
+
+STATES NewNextState(FIFO xTask);
 
 #endif /* FUNCTIONS_H_ */

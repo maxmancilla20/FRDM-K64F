@@ -18,14 +18,22 @@ void (*state)(); /*Pointer to function for state machine*/
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-unsigned long Counter = 0;
-unsigned long CurrentCounter = 0;
-uint16_t Interval = 200; /*Blink Interval, change to toggle led to a faster frequency*/
-uint8_t ChangeFlag = 0; /*Start flag. used to synchronize outputs when a state change is requested.*/
 
 /* Whether the SW button is pressed */
 volatile bool g_ButtonPress = false; /*Switch 3 status*/
 volatile bool g_ButtonPress_TWO = false; /*Switch 2 status*/
+
+uint8_t TaskN = 0;
+/*           Active, Function       , Time, Task   */
+FIFO Task1 = {1    , BlinkRed       , 50  , STATE_1};
+FIFO Task2 = {0    , BlinkGreen     , 75  , STATE_2};
+FIFO Task3 = {1    , BlinkBlue      , 100 , STATE_3};
+FIFO Task4 = {0    , BlinkYellow    , 125 , STATE_4};
+FIFO Task5 = {1    , BlinkLightBlue , 150 , STATE_5};
+FIFO Task6 = {1    , BlinkPurple    , 200 , STATE_6};
+FIFO Tasks[5]; /*Array of tasks, here is the FIFO configured.*/
+
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -110,190 +118,216 @@ int main(void)
     GPIO_PinInit(BOARD_LED_GPIO_THREE, BOARD_LED_GPIO_PIN_THREE, &led_config);
 
     state = BlinkRed; /*Initial State*/
-    FIFO Task1 = {1, BlinkRed, 5};
-    FIFO Task2 = {0, BlinkRed, 5};
-    FIFO Task3 = {1, BlinkBlue, 10};
-    FIFO Task4 = {0, BlinkRed, 5};
-    FIFO Task5 = {1, BlinkPurple, 15};
-    FIFO Task6 = {0, BlinkRed, 5};
+    /*Assing tasks to tasks array*/
+    Tasks[0] = Task1;
+    Tasks[1] = Task2;
+    Tasks[2] = Task3;
+    Tasks[3] = Task4;
+    Tasks[4] = Task5;
+    Tasks[5] = Task6;
 
-    FIFO Tasks[] = {Task1, Task2, Task3, Task4, Task5, Task6};
     while (1)
-    {  
-        if(__LONG_MAX__ > Counter) 
-        {
-            Counter++; /*Counter used to blink outputs.*/
-        }
-        else
-        {
-            Counter = 0; /*Counter reset to avoid overflows*/
-            CurrentCounter = 0;
-        }    
-        state();/*Call pointed function*/
+    {   
+        StateSelect(Tasks[TaskN].TaskNum);
     }
 }
 
 void BlinkRed(void)/*STATE_1*/
 {
+    uint64_t WaitTime = 200000u * Tasks[TaskN].Time;
+    static uint64_t WaitCnt = 0;
+
 	LED_GREEN_OFF();
 	LED_BLUE_OFF();
-    if( (Counter - CurrentCounter) >= Interval ) /*Toggle activated when the interval time is reached.*/
-    {
-    	LED_RED_TOGGLE();
-        CurrentCounter = Counter;
-    }
+
+    LED_RED_ON();
+
     PRINTF("\r\n STATE 1\r\n");
-    PRINTF("Counter: %u\n",Counter);
-    StateSelect(NextStateF());/*Call the next state.*/
+
+    while(WaitCnt <  WaitTime)
+    {
+        WaitCnt++;
+    }
+    WaitCnt = 0;
 }
 
 void BlinkGreen(void)/*STATE_2*/
 {
+    uint64_t WaitTime = 200000u * Tasks[TaskN].Time;
+    static uint64_t WaitCnt = 0;  
+
 	LED_RED_OFF();
 	LED_BLUE_OFF();
-    if( (Counter - CurrentCounter) >= Interval )
-    {
-    	LED_GREEN_TOGGLE();
-        CurrentCounter = Counter;
-    }
+
+    LED_GREEN_ON();
+
+
     PRINTF("\r\n STATE 2\r\n");
-    PRINTF("Counter: %u\n",Counter);
-    StateSelect(NextStateF());
+    while(WaitCnt <  WaitTime)
+    {
+        WaitCnt++;
+    }
+    WaitCnt = 0;
+
 }
 
 void BlinkBlue(void)/*STATE_3*/
 {
+    uint64_t WaitTime = 100000u * Tasks[TaskN].Time;
+    static uint64_t WaitCnt = 0; 
+
 	LED_RED_OFF();
 	LED_GREEN_OFF();
-    if( (Counter - CurrentCounter) >= Interval )
-    {
-    	LED_BLUE_TOGGLE();
-        CurrentCounter = Counter;
-    }
-    PRINTF("\r\n STATE 3\r\n");
-    PRINTF("Counter: %u\n",Counter);
-    StateSelect(NextStateF());
 
+    LED_BLUE_ON();
+
+    PRINTF("\r\n STATE 3\r\n");
+    while(WaitCnt <  WaitTime)
+    {
+        WaitCnt++;
+    }
+    WaitCnt = 0;
 }
 
 void BlinkYellow(void)/*STATE_4*/
 {
-	if(0u == ChangeFlag)/*Condition used to synchronize outputs before the state starts*/
-	{
-		LED_RED_OFF();
-		LED_GREEN_OFF();
-		LED_BLUE_OFF();
-		ChangeFlag = 1;
-	}
+    uint64_t WaitTime = 100000u * Tasks[TaskN].Time;
+    static uint64_t WaitCnt = 0;
 
-    if( (Counter - CurrentCounter) >= Interval )
-    {
-    	LED_RED_TOGGLE();
-    	LED_GREEN_TOGGLE();
-        CurrentCounter = Counter;
-    }
+    LED_RED_OFF();
+    LED_GREEN_OFF();
+    LED_BLUE_OFF();
+
+    LED_RED_ON();
+    LED_GREEN_ON();
+
     PRINTF("\r\n STATE 4\r\n");
-    PRINTF("Counter: %u\n",Counter);
-    StateSelect(NextStateF());
-
+    while(WaitCnt <  WaitTime)
+    {
+        WaitCnt++;
+    }
+    WaitCnt = 0;
 }
 
 void BlinkLightBlue(void)/*STATE_5*/
 {
-	if(0u == ChangeFlag)
-	{
-		LED_RED_OFF();
-		LED_GREEN_OFF();
-		LED_BLUE_OFF();
-		ChangeFlag = 1;
-	}
+    uint64_t WaitTime = 100000u * Tasks[TaskN].Time;
+    static uint64_t WaitCnt = 0;
 
-    if( (Counter - CurrentCounter) >= Interval )
-    {
-    	LED_BLUE_TOGGLE();
-    	LED_GREEN_TOGGLE();
-        CurrentCounter = Counter;
-    }
+    LED_RED_OFF();
+    LED_GREEN_OFF();
+    LED_BLUE_OFF();
+
+    LED_BLUE_ON();
+    LED_GREEN_ON();
     PRINTF("\r\n STATE 5\r\n");
-    PRINTF("Counter: %u\n",Counter);
-    StateSelect(NextStateF());
+    while(WaitCnt <  WaitTime)
+    {
+        WaitCnt++;
+    }
+    WaitCnt = 0;
 }
 
 void BlinkPurple(void)/*STATE_6*/
 {
-	if(0u == ChangeFlag)
-	{
-		LED_RED_OFF();
-		LED_GREEN_OFF();
-		LED_BLUE_OFF();
-		ChangeFlag = 1;
-	}
+    uint64_t WaitTime = 100000u * Tasks[TaskN].Time;
+    static uint64_t WaitCnt = 0;
 
-    if( (Counter - CurrentCounter) >= Interval )
-    {
-    	LED_RED_TOGGLE();
-    	LED_BLUE_TOGGLE();
-        CurrentCounter = Counter;
-    }
+    LED_RED_OFF();
+    LED_GREEN_OFF();
+    LED_BLUE_OFF();
+
+    LED_RED_ON();
+    LED_BLUE_ON();
+
     PRINTF("\r\n STATE 6\r\n");
-    PRINTF("Counter: %u\n",Counter);
-    StateSelect(NextStateF());
-
+    while(WaitCnt <  WaitTime)
+    {
+        WaitCnt++;
+    }
+    WaitCnt = 0;
 }
 
 void StateSelect(STATES NextState) /*Function used to switch states.*/
 {
+    if( TaskN > STATE_6)
+    {
+        TaskN = 0;
+    }
     switch(NextState)
         {
             case STATE_1:
             {
-                state = BlinkRed;
+                state = Tasks[TaskN].state;
+                if(Tasks[TaskN].IsActive == 1)/*Validate if the Task is active or not.*/
+                {
+                    state();
+                }
+                TaskN++;
+                
             }               
             break;
             case STATE_2:
             {             
-                state = BlinkGreen;
+                state = Tasks[TaskN].state;
+                if(Tasks[TaskN].IsActive == 1)
+                {
+                    state();
+                }
+                TaskN++;
+                
             }
             break;
             case STATE_3:
             {
-                state = BlinkBlue;
+                state = Tasks[TaskN].state;
+                if(Tasks[TaskN].IsActive == 1)
+                {
+                    state();
+                }
+                TaskN++;
+               
             }
             break;
             case STATE_4:
             {
-            	if(state != BlinkYellow)
-            	{
-            		ChangeFlag = 0;
-            	}
-            	state = BlinkYellow;
+            	state = Tasks[TaskN].state;
+                if(Tasks[TaskN].IsActive == 1)
+                {
+                    state();
+                }
+                TaskN++;
+               
             }
             break;
             case STATE_5:
             {
-            	if(state != BlinkLightBlue)
-            	{
-            		ChangeFlag = 0;
-            	}
-            	state = BlinkLightBlue;
+            	state = Tasks[TaskN].state;
+                if(Tasks[TaskN].IsActive == 1)
+                {
+                    state();
+                }
+                TaskN++;
+                
             }
             break;
             case STATE_6:
             {
-            	if(state != BlinkPurple)
-            	{
-            		ChangeFlag = 0;
-            	}
-            	state = BlinkPurple;
+            	state = Tasks[TaskN].state;
+                if(Tasks[TaskN].IsActive == 1)
+                {
+                    state();
+                }        
+                TaskN++;        
             }
             break; 
             default:
             {
                 /*Out of range. For security return to default conditions*/
+                //TaskN++;
                 state = main;
-                Counter = 0; /*Counter reset to avoid overflows*/
-                CurrentCounter = 0;
                 PRINTF("\r\n OUT OF STATES\r\n");
+                state();
             }
             break;
         }
