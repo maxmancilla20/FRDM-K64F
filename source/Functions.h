@@ -71,10 +71,10 @@ typedef enum /*Variable used to select states.*/
 
 typedef struct
 {
-    uint8_t IsActive;
-    void (*state)();
-    uint16_t Time;
-    STATES TaskNum;
+    uint8_t IsActive;/* Flag to determine if the task will be added or deleted*/
+    void (*state)(); /* Pointer to function*/
+    uint16_t Time; /*Delay in the task*/
+    STATES TaskNum; /*Task Identifier*/
 }FIFO;
 
 
@@ -87,6 +87,6 @@ void BlinkYellow(void);
 void BlinkLightBlue(void);
 void BlinkPurple(void);
 
-STATES NewNextState(FIFO xTask);
+STATES NewNextState(FIFO xTask); /*Used to return the task identifier*/
 
 #endif /* FUNCTIONS_H_ */

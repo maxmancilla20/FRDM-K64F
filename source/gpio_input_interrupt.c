@@ -24,13 +24,13 @@ volatile bool g_ButtonPress = false; /*Switch 3 status*/
 volatile bool g_ButtonPress_TWO = false; /*Switch 2 status*/
 
 uint8_t TaskN = 0;
-/*           Active, Function       , Time, Task   */
-FIFO Task1 = {1    , BlinkRed       , 50  , STATE_1};
-FIFO Task2 = {0    , BlinkGreen     , 75  , STATE_2};
-FIFO Task3 = {1    , BlinkBlue      , 100 , STATE_3};
-FIFO Task4 = {0    , BlinkYellow    , 125 , STATE_4};
-FIFO Task5 = {1    , BlinkLightBlue , 150 , STATE_5};
-FIFO Task6 = {1    , BlinkPurple    , 200 , STATE_6};
+/*           IsActive, Function       , Time, Task   */
+FIFO Task1 = {1      , BlinkRed       , 50  , STATE_1};
+FIFO Task2 = {0      , BlinkGreen     , 75  , STATE_2};
+FIFO Task3 = {1      , BlinkBlue      , 100 , STATE_3};
+FIFO Task4 = {0      , BlinkYellow    , 125 , STATE_4};
+FIFO Task5 = {1      , BlinkLightBlue , 150 , STATE_5};
+FIFO Task6 = {1      , BlinkPurple    , 200 , STATE_6};
 FIFO Tasks[5]; /*Array of tasks, here is the FIFO configured.*/
 
 
@@ -118,7 +118,7 @@ int main(void)
     GPIO_PinInit(BOARD_LED_GPIO_THREE, BOARD_LED_GPIO_PIN_THREE, &led_config);
 
     state = BlinkRed; /*Initial State*/
-    /*Assing tasks to tasks array*/
+    /*Assing taskN to tasks array*/
     Tasks[0] = Task1;
     Tasks[1] = Task2;
     Tasks[2] = Task3;
@@ -128,7 +128,7 @@ int main(void)
 
     while (1)
     {   
-        StateSelect(Tasks[TaskN].TaskNum);
+        StateSelect(Tasks[TaskN].TaskNum); /*Ininite loop that choose the next state.*/
     }
 }
 
@@ -144,7 +144,7 @@ void BlinkRed(void)/*STATE_1*/
 
     PRINTF("\r\n STATE 1\r\n");
 
-    while(WaitCnt <  WaitTime)
+    while(WaitCnt <  WaitTime) /*Delay*/
     {
         WaitCnt++;
     }
@@ -250,85 +250,80 @@ void BlinkPurple(void)/*STATE_6*/
 
 void StateSelect(STATES NextState) /*Function used to switch states.*/
 {
-    if( TaskN > STATE_6)
+    if( TaskN > STATE_6) /*Threshold for TaskN*/
     {
         TaskN = 0;
     }
     switch(NextState)
+    {
+        case STATE_1:
         {
-            case STATE_1:
+            state = Tasks[TaskN].state; /*Asigning function to be executed*/
+            if(Tasks[TaskN].IsActive == 1)/*Validate if the Task is active or not.*/
             {
-                state = Tasks[TaskN].state;
-                if(Tasks[TaskN].IsActive == 1)/*Validate if the Task is active or not.*/
-                {
-                    state();
-                }
-                TaskN++;
-                
-            }               
-            break;
-            case STATE_2:
-            {             
-                state = Tasks[TaskN].state;
-                if(Tasks[TaskN].IsActive == 1)
-                {
-                    state();
-                }
-                TaskN++;
-                
+                state(); /*Execute function*/
             }
-            break;
-            case STATE_3:
+            TaskN++; /*Go to the next task*/   
+        }               
+        break;
+        case STATE_2:
+        {             
+            state = Tasks[TaskN].state;
+            if(Tasks[TaskN].IsActive == 1)
             {
-                state = Tasks[TaskN].state;
-                if(Tasks[TaskN].IsActive == 1)
-                {
-                    state();
-                }
-                TaskN++;
-               
-            }
-            break;
-            case STATE_4:
-            {
-            	state = Tasks[TaskN].state;
-                if(Tasks[TaskN].IsActive == 1)
-                {
-                    state();
-                }
-                TaskN++;
-               
-            }
-            break;
-            case STATE_5:
-            {
-            	state = Tasks[TaskN].state;
-                if(Tasks[TaskN].IsActive == 1)
-                {
-                    state();
-                }
-                TaskN++;
-                
-            }
-            break;
-            case STATE_6:
-            {
-            	state = Tasks[TaskN].state;
-                if(Tasks[TaskN].IsActive == 1)
-                {
-                    state();
-                }        
-                TaskN++;        
-            }
-            break; 
-            default:
-            {
-                /*Out of range. For security return to default conditions*/
-                //TaskN++;
-                state = main;
-                PRINTF("\r\n OUT OF STATES\r\n");
                 state();
             }
-            break;
+            TaskN++;                
         }
+        break;
+        case STATE_3:
+        {
+            state = Tasks[TaskN].state;
+            if(Tasks[TaskN].IsActive == 1)
+            {
+                state();
+            }
+            TaskN++;              
+        }
+        break;
+        case STATE_4:
+        {
+            state = Tasks[TaskN].state;
+            if(Tasks[TaskN].IsActive == 1)
+            {
+                state();
+            }
+            TaskN++;             
+        }
+        break;
+        case STATE_5:
+        {
+            state = Tasks[TaskN].state;
+            if(Tasks[TaskN].IsActive == 1)
+            {
+                state();
+            }
+            TaskN++;               
+        }
+        break;
+        case STATE_6:
+        {
+            state = Tasks[TaskN].state;
+            if(Tasks[TaskN].IsActive == 1)
+            {
+                state();
+            }        
+            TaskN++;        
+        }
+        break; 
+        default:
+        {
+            /*Out of range. For security return to default conditions*/
+            TaskN = 0;
+            state = main;
+            PRINTF("\r\n OUT OF STATES\r\n");
+            state();
+        }
+        break;
+    }
 }
