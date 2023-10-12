@@ -86,6 +86,7 @@ void BlinkBlue(void);
 void BlinkYellow(void);
 void BlinkLightBlue(void);
 void BlinkPurple(void);
+void TaskCreateDelete(void);
 
 STATES NewNextState(FIFO xTask); /*Used to return the task identifier*/
 

@@ -129,6 +129,11 @@ int main(void)
     while (1)
     {   
         StateSelect(Tasks[TaskN].TaskNum); /*Ininite loop that choose the next state.*/
+        if(g_ButtonPress == true)
+        {
+            g_ButtonPress = false;
+            TaskCreateDelete();           
+        }
     }
 }
 
@@ -326,4 +331,41 @@ void StateSelect(STATES NextState) /*Function used to switch states.*/
         }
         break;
     }
+}
+
+void TaskCreateDelete()
+{
+    /*When the SW is pressed, this function is called.           */
+    /*Each time the SW is pressed, the var NumTask will increment*/
+    /*The value of NumTask will be the selected task to toggle-  */
+
+    uint64_t WaitTime = 20000000u; /*Limit time to select the task to toggle.*/
+    static uint64_t WaitCnt = 0;
+    PRINTF("\r\nTOGGLE STATE");
+    static uint8_t NumTask;
+    NumTask = 0;
+    while(WaitCnt <  WaitTime) /*Delay*/
+    {
+        if(g_ButtonPress == true)
+        {
+            NumTask++;
+            if(NumTask > STATE_6) /*Threshold used to don't pass STATE_6*/
+            {
+                NumTask = STATE_6;
+            }           
+            g_ButtonPress = false;
+        }
+        WaitCnt++;
+    }
+    WaitCnt = 0; /*Reset Delay.*/
+    PRINTF(" -> : %d\r\n", NumTask+1 );
+    if(Tasks[NumTask].IsActive == 1) /*Functionality used to toggle the task.*/
+    {
+        Tasks[NumTask].IsActive = 0;
+    }
+    else
+    {
+        Tasks[NumTask].IsActive = 1;
+    }
+    
 }
