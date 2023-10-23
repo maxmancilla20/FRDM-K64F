@@ -25,14 +25,15 @@ volatile bool g_ButtonPress_TWO = false; /*Switch 2 status*/
 
 uint8_t TaskN = 0;
 /*           IsActive, Function       , Time, Task   */
-FIFO Task1 = {1      , BlinkRed       , 50  , STATE_1};
-FIFO Task2 = {0      , BlinkGreen     , 75  , STATE_2};
-FIFO Task3 = {1      , BlinkBlue      , 100 , STATE_3};
-FIFO Task4 = {0      , BlinkYellow    , 125 , STATE_4};
-FIFO Task5 = {1      , BlinkLightBlue , 150 , STATE_5};
-FIFO Task6 = {1      , BlinkPurple    , 200 , STATE_6};
-FIFO Tasks[5]; /*Array of tasks, here is the FIFO configured.*/
-
+FIFO Task1 = {1      , BlinkRed       , 50  , STATE_1, 6};
+FIFO Task2 = {0      , BlinkGreen     , 75  , STATE_2, 2};
+FIFO Task3 = {1      , BlinkBlue      , 100 , STATE_3, 3};
+FIFO Task4 = {0      , BlinkYellow    , 125 , STATE_4, 6};
+FIFO Task5 = {1      , BlinkLightBlue , 150 , STATE_5, 5};
+FIFO Task6 = {1      , BlinkPurple    , 200 , STATE_6, 6};
+FIFO Tasks[]; /*Array of tasks, here is the FIFO configured.*/
+STATES PriorityOrder[] = {};
+FIFO CopyTasks[]; /*Copy used to re ogranize the array in order to priority*/
 
 /*******************************************************************************
  * Code
@@ -125,10 +126,16 @@ int main(void)
     Tasks[3] = Task4;
     Tasks[4] = Task5;
     Tasks[5] = Task6;
-
+    CopyTasks[0] = Task1;
+    CopyTasks[1] = Task2;
+    CopyTasks[2] = Task3;
+    CopyTasks[3] = Task4;
+    CopyTasks[4] = Task5;
+    CopyTasks[5] = Task6;
+    PriorityTasks();
     while (1)
     {   
-        StateSelect(Tasks[TaskN].TaskNum); /*Ininite loop that choose the next state.*/
+        StateSelect(CopyTasks[TaskN].TaskNum); /*Infinite loop that choose the next state.*/
         if(g_ButtonPress == true)
         {
             g_ButtonPress = false;
@@ -139,7 +146,7 @@ int main(void)
 
 void BlinkRed(void)/*STATE_1*/
 {
-    uint64_t WaitTime = 200000u * Tasks[TaskN].Time;
+    uint64_t WaitTime = 200000u * CopyTasks[TaskN].Time;
     static uint64_t WaitCnt = 0;
 
 	LED_GREEN_OFF();
@@ -158,7 +165,7 @@ void BlinkRed(void)/*STATE_1*/
 
 void BlinkGreen(void)/*STATE_2*/
 {
-    uint64_t WaitTime = 200000u * Tasks[TaskN].Time;
+    uint64_t WaitTime = 200000u * CopyTasks[TaskN].Time;
     static uint64_t WaitCnt = 0;  
 
 	LED_RED_OFF();
@@ -178,7 +185,7 @@ void BlinkGreen(void)/*STATE_2*/
 
 void BlinkBlue(void)/*STATE_3*/
 {
-    uint64_t WaitTime = 100000u * Tasks[TaskN].Time;
+    uint64_t WaitTime = 100000u * CopyTasks[TaskN].Time;
     static uint64_t WaitCnt = 0; 
 
 	LED_RED_OFF();
@@ -196,7 +203,7 @@ void BlinkBlue(void)/*STATE_3*/
 
 void BlinkYellow(void)/*STATE_4*/
 {
-    uint64_t WaitTime = 100000u * Tasks[TaskN].Time;
+    uint64_t WaitTime = 100000u * CopyTasks[TaskN].Time;
     static uint64_t WaitCnt = 0;
 
     LED_RED_OFF();
@@ -216,7 +223,7 @@ void BlinkYellow(void)/*STATE_4*/
 
 void BlinkLightBlue(void)/*STATE_5*/
 {
-    uint64_t WaitTime = 100000u * Tasks[TaskN].Time;
+    uint64_t WaitTime = 100000u * CopyTasks[TaskN].Time;
     static uint64_t WaitCnt = 0;
 
     LED_RED_OFF();
@@ -235,7 +242,7 @@ void BlinkLightBlue(void)/*STATE_5*/
 
 void BlinkPurple(void)/*STATE_6*/
 {
-    uint64_t WaitTime = 100000u * Tasks[TaskN].Time;
+    uint64_t WaitTime = 100000u * CopyTasks[TaskN].Time;
     static uint64_t WaitCnt = 0;
 
     LED_RED_OFF();
@@ -259,12 +266,13 @@ void StateSelect(STATES NextState) /*Function used to switch states.*/
     {
         TaskN = 0;
     }
+
     switch(NextState)
     {
         case STATE_1:
         {
-            state = Tasks[TaskN].state; /*Asigning function to be executed*/
-            if(Tasks[TaskN].IsActive == 1)/*Validate if the Task is active or not.*/
+            state = CopyTasks[TaskN].state; /*Asigning function to be executed*/
+            if(CopyTasks[TaskN].IsActive == 1)/*Validate if the Task is active or not.*/
             {
                 state(); /*Execute function*/
             }
@@ -273,8 +281,8 @@ void StateSelect(STATES NextState) /*Function used to switch states.*/
         break;
         case STATE_2:
         {             
-            state = Tasks[TaskN].state;
-            if(Tasks[TaskN].IsActive == 1)
+            state = CopyTasks[TaskN].state;
+            if(CopyTasks[TaskN].IsActive == 1)
             {
                 state();
             }
@@ -283,8 +291,8 @@ void StateSelect(STATES NextState) /*Function used to switch states.*/
         break;
         case STATE_3:
         {
-            state = Tasks[TaskN].state;
-            if(Tasks[TaskN].IsActive == 1)
+            state = CopyTasks[TaskN].state;
+            if(CopyTasks[TaskN].IsActive == 1)
             {
                 state();
             }
@@ -293,8 +301,8 @@ void StateSelect(STATES NextState) /*Function used to switch states.*/
         break;
         case STATE_4:
         {
-            state = Tasks[TaskN].state;
-            if(Tasks[TaskN].IsActive == 1)
+            state = CopyTasks[TaskN].state;
+            if(CopyTasks[TaskN].IsActive == 1)
             {
                 state();
             }
@@ -303,8 +311,8 @@ void StateSelect(STATES NextState) /*Function used to switch states.*/
         break;
         case STATE_5:
         {
-            state = Tasks[TaskN].state;
-            if(Tasks[TaskN].IsActive == 1)
+            state = CopyTasks[TaskN].state;
+            if(CopyTasks[TaskN].IsActive == 1)
             {
                 state();
             }
@@ -313,8 +321,8 @@ void StateSelect(STATES NextState) /*Function used to switch states.*/
         break;
         case STATE_6:
         {
-            state = Tasks[TaskN].state;
-            if(Tasks[TaskN].IsActive == 1)
+            state = CopyTasks[TaskN].state;
+            if(CopyTasks[TaskN].IsActive == 1)
             {
                 state();
             }        
@@ -343,6 +351,7 @@ void TaskCreateDelete()
     static uint64_t WaitCnt = 0;
     PRINTF("\r\nTOGGLE STATE");
     static uint8_t NumTask;
+    uint8_t i;
     NumTask = 0;
     while(WaitCnt <  WaitTime) /*Delay*/
     {
@@ -359,13 +368,64 @@ void TaskCreateDelete()
     }
     WaitCnt = 0; /*Reset Delay.*/
     PRINTF(" -> : %d\r\n", NumTask+1 );
-    if(Tasks[NumTask].IsActive == 1) /*Functionality used to toggle the task.*/
+
+    for(i = STATE_1; i <= STATE_6; i++)/*For used to sincronize the active/inactive state to the correct array numer.*/
     {
-        Tasks[NumTask].IsActive = 0;
-    }
-    else
-    {
-        Tasks[NumTask].IsActive = 1;
+        if(NumTask == CopyTasks[i].TaskNum)/*If the states match then toggle the state.*/
+        {
+            if(CopyTasks[i].IsActive == 1)
+            {
+                CopyTasks[i].IsActive = 0;
+            }
+            else
+            {
+                CopyTasks[i].IsActive = 1;
+            }            
+        }
     }
     
+}
+
+
+void PriorityTasks()
+{
+    STATES j, k, i, temp; /*TaskNum*/
+    uint8_t temp2;  /*Priority*/
+    uint16_t temp3; /*Time Active*/
+    void (*temp4)(); /*Ptr to Fct*/
+    uint8_t temp5; /*IsActive*/
+
+    for(i = STATE_1; i <= STATE_6; i++)
+    {
+        for(j = STATE_1, k = STATE_2; k <= STATE_6; j++, k++)
+        {
+            if(CopyTasks[j].Priority < CopyTasks[k].Priority) /*Usted to re order by components. All components are moved in order to priority*/
+            {
+                temp = CopyTasks[k].TaskNum;
+                CopyTasks[k].TaskNum = CopyTasks[j].TaskNum;
+                CopyTasks[j].TaskNum = temp;
+
+                temp2 = CopyTasks[k].Priority;
+                CopyTasks[k].Priority = CopyTasks[j].Priority;
+                CopyTasks[j].Priority = temp2;
+
+                temp3 = CopyTasks[k].Time;
+                CopyTasks[k].Time = CopyTasks[j].Time;
+                CopyTasks[j].Time = temp3;
+
+                temp4 = CopyTasks[k].state;
+                CopyTasks[k].state = CopyTasks[j].state;
+                CopyTasks[j].state = temp4;
+
+                temp5 = CopyTasks[k].IsActive;
+                CopyTasks[k].IsActive = CopyTasks[j].IsActive;
+                CopyTasks[j].IsActive = temp5;
+                                
+            }
+        }
+    }
+    for(i = STATE_1; i <= STATE_6; i++)
+    {
+        PRINTF("\r\n RE-ORDERED STATE %d\r\n", CopyTasks[i].TaskNum+1); /*Print Re-Ordered array.*/
+    }
 }

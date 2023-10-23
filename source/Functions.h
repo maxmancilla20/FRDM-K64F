@@ -75,6 +75,7 @@ typedef struct
     void (*state)(); /* Pointer to function*/
     uint16_t Time; /*Delay in the task*/
     STATES TaskNum; /*Task Identifier*/
+    uint8_t Priority;
 }FIFO;
 
 
