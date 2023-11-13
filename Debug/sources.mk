@@ -14,10 +14,8 @@ OBJS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
+CMSIS \
 board \
-component/lists \
-component/uart \
-device \
 drivers \
 source \
 startup \

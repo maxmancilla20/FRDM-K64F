@@ -1,0 +1,4 @@
+core_cm4.h:1800:22:__NVIC_SetPriority	16	static
+core_cm4.h:2006:26:SysTick_Config	16	static
+FRDM-K64F_SysTick.c:43:56:SysTick_Handler	8	static
+FRDM-K64F_SysTick.c:54:5:main	16	static

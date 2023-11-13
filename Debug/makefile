@@ -12,10 +12,8 @@ RM := rm -rf
 -include startup/subdir.mk
 -include source/subdir.mk
 -include drivers/subdir.mk
--include device/subdir.mk
--include component/uart/subdir.mk
--include component/lists/subdir.mk
 -include board/subdir.mk
+-include CMSIS/subdir.mk
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(strip $(C_DEPS)),)
 -include $(C_DEPS)
@@ -30,7 +28,7 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := frdmk64f_gpio_input_interrupt_Swich button
+BUILD_ARTIFACT_NAME := ContextSwitch
 BUILD_ARTIFACT_EXTENSION := axf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
@@ -42,24 +40,24 @@ all:
 	+@$(MAKE) --no-print-directory main-build && $(MAKE) --no-print-directory post-build
 
 # Main-build Target
-main-build: frdmk64f_gpio_input_interrupt_Swich\ button.axf
+main-build: ContextSwitch.axf
 
 # Tool invocations
-frdmk64f_gpio_input_interrupt_Swich\ button.axf: $(OBJS) $(USER_OBJS) makefile $(OPTIONAL_TOOL_DEPS)
+ContextSwitch.axf: $(OBJS) $(USER_OBJS) makefile $(OPTIONAL_TOOL_DEPS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU Linker'
-	arm-none-eabi-gcc -nostdlib -Xlinker -Map="frdmk64f_gpio_input_interrupt_Swich button.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -T frdmk64f_gpio_input_interrupt_Swich_button_Debug.ld -o "frdmk64f_gpio_input_interrupt_Swich button.axf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-gcc -nostdlib -Xlinker -print-memory-usage -Xlinker --gc-sections -Xlinker -Map="ContextSwitch.map" -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -T ContextSwitch_Debug.ld -o "ContextSwitch.axf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) frdmk64f_gpio_input_interrupt_Swich/\ button.axf
+	-$(RM) ContextSwitch.axf
 	-@echo ' '
 
 post-build:
 	-@echo 'Performing post-build steps'
-	-arm-none-eabi-size "frdmk64f_gpio_input_interrupt_Swich button.axf"; # arm-none-eabi-objcopy -v -O binary "frdmk64f_gpio_input_interrupt_Swich button.axf" "frdmk64f_gpio_input_interrupt_Swich button.bin" ; # checksum -p MK64FN1M0xxx12 -d "frdmk64f_gpio_input_interrupt_Swich button.bin";
+	-arm-none-eabi-size "ContextSwitch.axf"; # arm-none-eabi-objcopy -v -O binary "ContextSwitch.axf" "ContextSwitch.bin" ; # checksum -p MK64FN1M0xxx12 -d "ContextSwitch.bin";
 	-@echo ' '
 
 .PHONY: all clean dependents main-build post-build

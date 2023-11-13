@@ -1,0 +1,4 @@
+../source/queuelib.c:3:6:_initqueue	16	static
+../source/queuelib.c:9:6:_enqueue	16	static
+../source/queuelib.c:17:5:_dequeue	24	static
+../source/queuelib.c:27:5:_isqueueempty	16	static
