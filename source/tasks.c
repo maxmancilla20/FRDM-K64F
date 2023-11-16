@@ -4,7 +4,6 @@
 #include "stdlib.h"
 
 QUEUE ready;
-
 //Naked
 void PendSV_Handler( void ) __attribute__ (( naked ));
 //PendSV_Handler:
@@ -82,42 +81,27 @@ switch or have our own register/stack handling in C function.
  */
 void PendSV_Handler( void )
 {
-	if (tasks[lastTask].status == END)
-	{
-		if (!_isqueueempty(&ready)) //If the ready queue is not empty then we look for more tasks.
-		{
-			/* Find a new task to run */
-			lastTask = _dequeue(&ready);
-			tasks[lastTask].status = RUNNING;
+	asm volatile("MRS	R0, PSP\n");
+	asm volatile("STMDB R0!, {R4-R11,LR}\n");
+	asm volatile("MOV     %0, R0\n" : "=r" (tasks[lastTask].stack));
 
-			/* Move the task's stack pointer address into r0 */
-			asm volatile("MOV     R0, %0\n" : : "r" (tasks[lastTask].stack));
-			/* Restore the new task's context and jump to the task */
-			asm volatile("LDMIA   R0!, {R4-R11, LR}\n");
-			asm volatile("MSR     PSP, R0\n");
-			asm volatile("BX      LR\n");
-		}
-		else //We return to the kernel (main() function) in case we finished all the tasks.
-		{
-			taskended = 1;
-			/* load kernel state */
-			asm volatile("POP     {R4, R5, R6, R7, R8, R9, R10, R11, IP, LR}  \n");
-			asm volatile("MSR     PSR_NZCVQ, IP \n");
-			asm volatile("BX      LR \n");
-		}
-	}
-	else
-	{
-		//The current task continue execution
-	}
+	lastTask++;
+	lastTask = lastTask % 5;
+
+	/* save user state */
+
+	/* Move the task's stack pointer address into r0 */
+	asm volatile("MOV     R0, %0\n" : : "r" (tasks[lastTask].stack));
+	/* Restore the new task's context and jump to the task */
+	asm volatile("LDMIA   R0!, {R4-R11, LR}\n");
+	asm volatile("MSR     PSP, R0\n");
+	asm volatile("BX      LR\n");	
 }
+
 
 void SysTick_Handler(void)
 {
-	if (tasks[lastTask].status == END)
-	{
-		SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
-	}
+	SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 }
 
 void task_start()
@@ -202,10 +186,10 @@ int task_create(void (*run)(void *), void *userdata)
 
 void task_kill(int task_id)
 {
-	tasks[task_id].status = END; //We end the task
+	tasks[task_id].status = READY; //We end the task
 
 	/* Free the stack */
-	free(tasks[task_id].orig_stack);
+	//free(tasks[task_id].orig_stack);
 }
 
 void task_self_terminal()
