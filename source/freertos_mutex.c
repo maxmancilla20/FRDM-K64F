@@ -132,15 +132,18 @@ static void write_task_2(void *pvParameters)
  */
 static void write_task_3(void *pvParameters)
 {
+int i = 0;
     while (1)
     {
         if (xSemaphoreTake(xMutex, portMAX_DELAY) != pdTRUE)
         {
             PRINTF("Failed to take semaphore.\r\n");
         }
-        PRINTF("3333 |");
-        taskYIELD();
-        PRINTF(" 3333\r\n");
+        for(i = 0; i <= 100u; i++)
+        {
+            PRINTF("Task3: %d\r\n", i);
+            taskYIELD();
+        }
         xSemaphoreGive(xMutex);
         taskYIELD();
     }
@@ -151,15 +154,18 @@ static void write_task_3(void *pvParameters)
  */
 static void write_task_4(void *pvParameters)
 {
+int i=0;
     while (1)
     {
         if (xSemaphoreTake(xMutex, portMAX_DELAY) != pdTRUE)
         {
             PRINTF("Failed to take semaphore.\r\n");
         }
-        PRINTF("4444 |");
-        taskYIELD();
-        PRINTF(" 4444\r\n");
+        for(i = 0; i <= 100u; i++)
+        {
+            PRINTF("Task4: %d\r\n", i);
+            taskYIELD();
+        }
         xSemaphoreGive(xMutex);
         taskYIELD();
     }
@@ -170,15 +176,18 @@ static void write_task_4(void *pvParameters)
  */
 static void write_task_5(void *pvParameters)
 {
+int i = 0;
     while (1)
     {
         if (xSemaphoreTake(xMutex, portMAX_DELAY) != pdTRUE)
         {
             PRINTF("Failed to take semaphore.\r\n");
         }
-        PRINTF("5555 |");
-        taskYIELD();
-        PRINTF(" 5555\r\n");
+        for(i = 0; i <= 100u; i++)
+        {
+            PRINTF("Task5: %d\r\n", i);
+            taskYIELD();
+        }
         xSemaphoreGive(xMutex);
         taskYIELD();
     }
