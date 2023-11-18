@@ -1,9 +1,19 @@
 Overview
 ========
-The GPIO Example project is a demonstration program that uses the KSDK software to manipulate the general-purpose
-outputs.
-The example is supported by the set, clear, and toggle write-only registers for each port output data register. The 
-example uses the software button to control/toggle the LED.
+This document explains the freertos_event example. It shows how task waits for an event (defined set
+of bits in event group). This event can be set by any other process or interrupt in the system.
+
+The example application creates three tasks. Two write tasks write_task_1 and write_task_2
+continuously setting event bit 0 and bit 1.
+
+Read_task is waiting for any event bit and printing actual state on console. Event bits are
+automatically cleared after read task is entered.
+
+Three possible states can occurre:
+Both bits are set.z
+Bit B0 is set.
+Bit B1 is set.
+
 
 Toolchain supported
 ===================
@@ -20,27 +30,16 @@ Hardware requirements
 
 Board settings
 ==============
-This example project does not call for any special hardware configurations.
+This Example project does not call for any special hardware configurations.
 Although not required, the recommendation is to leave the development board's jumper settings
 and configurations in default state when running this example.
-
-Prepare the Demo
-================
-1. Connect a USB cable between the PC host and the OpenSDA USB port on the board.
-2. Open a serial terminal with these settings:
-    - 115200 baud rate
-    - 8 data bits
-    - No parity
-    - One stop bit
-    - No flow control
-3. Download the program to the target board.
-4. Either press the reset button on your board or launch the debugger in your IDE to begin running the example.
-
 Running the demo
 ================
-These instructions are displayed/shown on the terminal window:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-GPIO Driver example
-Press SW3 to turn on/off a LED
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If you press the SW3, the LED RED will be toggled, and "SW3 is pressed" is shown on the terminal window.
+After the board is flashed the Tera Term will start printing the state of event bits.
+
+Example output:
+Bit B1 is set.
+Bit B0 is set.
+Bit B1 is set.
+Bit B0 is set.
+Bit B1 is set

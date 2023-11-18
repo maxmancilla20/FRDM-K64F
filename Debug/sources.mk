@@ -16,9 +16,13 @@ OBJS :=
 SUBDIRS := \
 board \
 component/lists \
+component/serial_manager \
 component/uart \
 device \
 drivers \
+freertos/freertos_kernel \
+freertos/freertos_kernel/portable/GCC/ARM_CM4F \
+freertos/freertos_kernel/portable/MemMang \
 source \
 startup \
 utilities \

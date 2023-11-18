@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>frdmk64f_gpio_input_interrupt_Swich button</name>
+	<name>frdmk64f_freertos_event</name>
 	<comment></comment>
 	<projects>
 	</projects>
