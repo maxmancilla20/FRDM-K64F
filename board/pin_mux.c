@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2017 ,2021 NXP
+ * Copyright 2016-2020 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -15,11 +15,11 @@
 /*
  * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 !!GlobalInfo
-product: Pins v9.0
+product: Pins v7.0
 processor: MK64FN1M0xxx12
 package_id: MK64FN1M0VLL12
 mcu_data: ksdk2_0
-processor_version: 9.0.0
+processor_version: 6.0.0
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -47,9 +47,6 @@ BOARD_InitPins:
 - pin_list:
   - {pin_num: '62', peripheral: UART0, signal: RX, pin_signal: PTB16/SPI1_SOUT/UART0_RX/FTM_CLKIN0/FB_AD17/EWM_IN}
   - {pin_num: '63', peripheral: UART0, signal: TX, pin_signal: PTB17/SPI1_SIN/UART0_TX/FTM_CLKIN1/FB_AD16/EWM_OUT_b}
-  - {pin_num: '38', peripheral: GPIOA, signal: 'GPIO, 4', pin_signal: PTA4/LLWU_P3/FTM0_CH1/NMI_b/EZP_CS_b, slew_rate: fast, open_drain: disable, drive_strength: high,
-    pull_select: up, pull_enable: enable, passive_filter: disable}
-  - {pin_num: '68', peripheral: GPIOB, signal: 'GPIO, 22', pin_signal: PTB22/SPI2_SOUT/FB_AD29/CMP2_OUT}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -62,62 +59,14 @@ BOARD_InitPins:
  * END ****************************************************************************************************************/
 void BOARD_InitPins(void)
 {
-    /* Port A Clock Gate Control: Clock enabled */
-    CLOCK_EnableClock(kCLOCK_PortA);
     /* Port B Clock Gate Control: Clock enabled */
     CLOCK_EnableClock(kCLOCK_PortB);
-    /* Port E Clock Gate Control: Clock enabled */
-    CLOCK_EnableClock(kCLOCK_PortE);
-    /* Port C Clock Gate Control: Clock enabled */
-    CLOCK_EnableClock(kCLOCK_PortC);
 
-    const port_pin_config_t porta4_pin38_config = {/* Internal pull-up resistor is enabled */
-                                                   kPORT_PullUp,
-                                                   /* Fast slew rate is configured */
-                                                   kPORT_FastSlewRate,
-                                                   /* Passive filter is disabled */
-                                                   kPORT_PassiveFilterDisable,
-                                                   /* Open drain is disabled */
-                                                   kPORT_OpenDrainDisable,
-                                                   /* High drive strength is configured */
-                                                   kPORT_HighDriveStrength,
-                                                   /* Pin is configured as PTA4 */
-                                                   kPORT_MuxAsGpio,
-                                                   /* Pin Control Register fields [15:0] are not locked */
-                                                   kPORT_UnlockRegister};
-
-    const port_pin_config_t portc6_pin78_config = {/* Internal pull-up resistor is enabled */
-                                                   kPORT_PullUp,
-                                                   /* Fast slew rate is configured */
-                                                   kPORT_FastSlewRate,
-                                                   /* Passive filter is disabled */
-                                                   kPORT_PassiveFilterDisable,
-                                                   /* Open drain is disabled */
-                                                   kPORT_OpenDrainDisable,
-                                                   /* High drive strength is configured */
-                                                   kPORT_HighDriveStrength,
-                                                   /* Pin is configured as PTA4 */
-                                                   kPORT_MuxAsGpio,
-                                                   /* Pin Control Register fields [15:0] are not locked */
-                                                   kPORT_UnlockRegister};
-    /* PORTA4 (pin 38) is configured as PTA4 */
-    PORT_SetPinConfig(PORTA, 4U, &porta4_pin38_config);
-
-    PORT_SetPinConfig(PORTC, 6U, &portc6_pin78_config);
     /* PORTB16 (pin 62) is configured as UART0_RX */
     PORT_SetPinMux(PORTB, 16U, kPORT_MuxAlt3);
 
     /* PORTB17 (pin 63) is configured as UART0_TX */
     PORT_SetPinMux(PORTB, 17U, kPORT_MuxAlt3);
-
-    /* PORTB22 (pin 68) is configured as PTB22 */
-    PORT_SetPinMux(PORTB, 22U, kPORT_MuxAsGpio);
-
-    /* PORTB22 (pin 67) is configured as PTB21 */
-    PORT_SetPinMux(PORTB, 21U, kPORT_MuxAsGpio);
-
-    /* PORTB22 (pin 33) is configured as PTB22 */
-    PORT_SetPinMux(PORTE, 26U, kPORT_MuxAsGpio);
 
     SIM->SOPT5 = ((SIM->SOPT5 &
                    /* Mask bits to zero which are setting */

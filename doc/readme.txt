@@ -1,9 +1,21 @@
 Overview
 ========
-The GPIO Example project is a demonstration program that uses the KSDK software to manipulate the general-purpose
-outputs.
-The example is supported by the set, clear, and toggle write-only registers for each port output data register. The 
-example uses the software button to control/toggle the LED.
+This document explains the freertos_mutex example. It shows how mutex manage access to common
+resource (terminal output).
+
+The example application creates two identical instances of write_task. Each task will lock the mutex
+before printing and unlock it after printing to ensure that the outputs from tasks are not mixed
+together.
+
+The test_task accept output message during creation as function parameter. Output message have two
+parts. If xMutex is unlocked, the write_task_1 acquire xMutex and print first part of message. Then
+rescheduling is performed. In this moment scheduler check if some other task could run, but second
+task write_task+_2 is blocked because xMutex is already locked by first write task. The first
+write_task_1 continue from last point by printing of second message part. Finaly the xMutex is
+unlocked and second instance of write_task_2 is executed.
+
+
+
 
 Toolchain supported
 ===================
@@ -20,27 +32,16 @@ Hardware requirements
 
 Board settings
 ==============
-This example project does not call for any special hardware configurations.
+This Example project does not call for any special hardware configurations.
 Although not required, the recommendation is to leave the development board's jumper settings
 and configurations in default state when running this example.
-
-Prepare the Demo
-================
-1. Connect a USB cable between the PC host and the OpenSDA USB port on the board.
-2. Open a serial terminal with these settings:
-    - 115200 baud rate
-    - 8 data bits
-    - No parity
-    - One stop bit
-    - No flow control
-3. Download the program to the target board.
-4. Either press the reset button on your board or launch the debugger in your IDE to begin running the example.
-
 Running the demo
 ================
-These instructions are displayed/shown on the terminal window:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-GPIO Driver example
-Press SW3 to turn on/off a LED
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If you press the SW3, the LED RED will be toggled, and "SW3 is pressed" is shown on the terminal window.
+After the board is flashed the Tera Term will start periodically printing strings synchronized by
+mutex.
+
+Example output:
+"ABCD | EFGH"
+"1234 | 5678"
+"ABCD | EFGH"
+"1234 | 5678"

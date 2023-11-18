@@ -1,0 +1,6 @@
+../source/freertos_mutex.c:44:5:main	16	static
+../source/freertos_mutex.c:95:13:write_task_1	16	static
+../source/freertos_mutex.c:114:13:write_task_2	16	static
+../source/freertos_mutex.c:133:13:write_task_3	16	static
+../source/freertos_mutex.c:152:13:write_task_4	16	static
+../source/freertos_mutex.c:171:13:write_task_5	16	static
