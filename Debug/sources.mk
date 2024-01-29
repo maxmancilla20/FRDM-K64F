@@ -19,6 +19,8 @@ component/lists \
 component/uart \
 device \
 drivers \
+mdio \
+phy \
 source \
 startup \
 utilities \

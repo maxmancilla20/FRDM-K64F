@@ -11,6 +11,8 @@ RM := rm -rf
 -include utilities/subdir.mk
 -include startup/subdir.mk
 -include source/subdir.mk
+-include phy/subdir.mk
+-include mdio/subdir.mk
 -include drivers/subdir.mk
 -include device/subdir.mk
 -include component/uart/subdir.mk
@@ -30,7 +32,7 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := frdmk64f_gpio_input_interrupt_Swich button
+BUILD_ARTIFACT_NAME := frdmk64f_cmsis_enet_txrx_transfer
 BUILD_ARTIFACT_EXTENSION := axf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
@@ -42,24 +44,24 @@ all:
 	+@$(MAKE) --no-print-directory main-build && $(MAKE) --no-print-directory post-build
 
 # Main-build Target
-main-build: frdmk64f_gpio_input_interrupt_Swich\ button.axf
+main-build: frdmk64f_cmsis_enet_txrx_transfer.axf
 
 # Tool invocations
-frdmk64f_gpio_input_interrupt_Swich\ button.axf: $(OBJS) $(USER_OBJS) makefile $(OPTIONAL_TOOL_DEPS)
+frdmk64f_cmsis_enet_txrx_transfer.axf: $(OBJS) $(USER_OBJS) makefile $(OPTIONAL_TOOL_DEPS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU Linker'
-	arm-none-eabi-gcc -nostdlib -Xlinker -Map="frdmk64f_gpio_input_interrupt_Swich button.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -T frdmk64f_gpio_input_interrupt_Swich_button_Debug.ld -o "frdmk64f_gpio_input_interrupt_Swich button.axf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-gcc -nostdlib -Xlinker -Map="frdmk64f_cmsis_enet_txrx_transfer.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -T frdmk64f_cmsis_enet_txrx_transfer_Debug.ld -o "frdmk64f_cmsis_enet_txrx_transfer.axf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) frdmk64f_gpio_input_interrupt_Swich/\ button.axf
+	-$(RM) frdmk64f_cmsis_enet_txrx_transfer.axf
 	-@echo ' '
 
 post-build:
 	-@echo 'Performing post-build steps'
-	-arm-none-eabi-size "frdmk64f_gpio_input_interrupt_Swich button.axf"; # arm-none-eabi-objcopy -v -O binary "frdmk64f_gpio_input_interrupt_Swich button.axf" "frdmk64f_gpio_input_interrupt_Swich button.bin" ; # checksum -p MK64FN1M0xxx12 -d "frdmk64f_gpio_input_interrupt_Swich button.bin";
+	-arm-none-eabi-size "frdmk64f_cmsis_enet_txrx_transfer.axf"; # arm-none-eabi-objcopy -v -O binary "frdmk64f_cmsis_enet_txrx_transfer.axf" "frdmk64f_cmsis_enet_txrx_transfer.bin" ; # checksum -p MK64FN1M0xxx12 -d "frdmk64f_cmsis_enet_txrx_transfer.bin";
 	-@echo ' '
 
 .PHONY: all clean dependents main-build post-build
