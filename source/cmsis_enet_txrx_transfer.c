@@ -101,19 +101,24 @@ void ENET_SignalEvent_t(uint32_t event)
 static void ENET_BuildBroadCastFrame(void)
 {
     uint32_t count  = 0;
-    uint32_t length = ENET_DATA_LENGTH - 14;
-
+    uint32_t length = ENET_DATA_LENGTH - 46;
+    char MyName[] = "MAXIMILIANO MANCILLA TORRES";
     for (count = 0; count < 6U; count++)
     {
-        g_frame[count] = 0xFFU;
+        g_frame[count] = 0xFF;
     }
     memcpy(&g_frame[6], &g_macAddr[0], 6U);
     g_frame[12] = (length >> 8) & 0xFFU;
     g_frame[13] = length & 0xFFU;
 
+    for (count = 0; count < 28U; count++)
+    {
+        g_frame[count + 18] = MyName[count];
+    }
+    
     for (count = 0; count < length; count++)
     {
-        g_frame[count + 14] = count % 0xFFU;
+        g_frame[count + 46] =  0xFFU;
     }
 }
 
