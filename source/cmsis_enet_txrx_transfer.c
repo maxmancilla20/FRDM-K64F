@@ -23,6 +23,8 @@
 #include "fsl_phyksz8081.h"
 #include "fsl_enet_mdio.h"
 #include "RTE_Device.h"
+
+#include "Ethernet_CryptoCrc.h"
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -51,6 +53,7 @@ uint8_t g_macAddr[6]           = MAC_ADDRESS;
 volatile uint32_t g_rxIndex    = 0;
 volatile uint32_t g_rxCheckIdx = 0;
 volatile uint32_t g_txCheckIdx = 0;
+uint32_t globaldata;
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -68,6 +71,7 @@ void ENET_SignalEvent_t(uint32_t event)
     {
         uint32_t size;
         uint32_t len;
+        uint32_t index;
 
         /* Get the Frame size */
         size = EXAMPLE_ENET.GetRxFrameSize();
@@ -100,9 +104,23 @@ void ENET_SignalEvent_t(uint32_t event)
 /*! @brief Build Frame for transmit. */
 static void ENET_BuildBroadCastFrame(void)
 {
+    uint8_t MyName[] = "AABBCCDDEEFFAABBCCDDFF";
     uint32_t count  = 0;
     uint32_t length = ENET_DATA_LENGTH - 46;
-    char MyName[] = "MAXIMILIANO MANCILLA TORRES";
+
+    /*Msg to send*/
+    PRINTF("\r\n ----------------------------RAW MESSAGE---------------------------------.\r\n");
+
+    for(int i=0; i < 23; i++) {
+		PRINTF("0x%x,", MyName[i]);
+	}
+    PRINTF("\r\n");
+
+    /*Encrypt Msg*/
+    uint8_t * Encrypted_Msg = EncryptMsg(MyName);
+
+
+    /*Build Ethernet Buffer*/
     for (count = 0; count < 6U; count++)
     {
         g_frame[count] = 0xFF;
@@ -111,15 +129,24 @@ static void ENET_BuildBroadCastFrame(void)
     g_frame[12] = (length >> 8) & 0xFFU;
     g_frame[13] = length & 0xFFU;
 
-    for (count = 0; count < 28U; count++)
+    /*Add Encrypted data to the buffer*/
+    PRINTF("\r\n ---------------------Encrypted Msg on Buffer----------------------------------.\r\n");
+    for (count = 0; count < Get_Msg_Lenght(); count++)
     {
-        g_frame[count + 18] = MyName[count];
+        g_frame[count + 18] = Encrypted_Msg[count];
+        PRINTF("0x%02x,", g_frame[count + 18] );
     }
-    
-    for (count = 0; count < length; count++)
-    {
-        g_frame[count + 46] =  0xFFU;
-    }
+    PRINTF("\r\n ---------------------CRC on Buffer----------------------------------.\r\n");
+    (void)Get_CRC32(1);/*Print obtained CRC*/
+    /*32 bits CRC divided in 4 different bytes*/
+    g_frame[Get_Msg_Lenght() + 18] = (uint8_t)(Get_CRC32(0) >> 24);
+    g_frame[Get_Msg_Lenght() + 19] = (uint8_t)(Get_CRC32(0) >> 16);
+    g_frame[Get_Msg_Lenght() + 20] = (uint8_t)(Get_CRC32(0) >> 8);
+    g_frame[Get_Msg_Lenght() + 21] = (uint8_t)Get_CRC32(0);
+    PRINTF("0x%02x,", g_frame[Get_Msg_Lenght() + 18] );
+    PRINTF("0x%02x,", g_frame[Get_Msg_Lenght() + 19] );
+    PRINTF("0x%02x,", g_frame[Get_Msg_Lenght() + 20] );
+    PRINTF("0x%02x,", g_frame[Get_Msg_Lenght() + 21] );
 }
 
 /*!

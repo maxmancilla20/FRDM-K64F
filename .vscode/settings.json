@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "ethernet_cryptocrc.h": "c",
+        "aes.h": "c"
+    }
+}

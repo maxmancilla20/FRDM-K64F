@@ -4,15 +4,24 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../source/Ethernet_CryptoCrc.c \
+../source/aes.c \
 ../source/cmsis_enet_txrx_transfer.c \
+../source/fsl_crc.c \
 ../source/semihost_hardfault.c 
 
 C_DEPS += \
+./source/Ethernet_CryptoCrc.d \
+./source/aes.d \
 ./source/cmsis_enet_txrx_transfer.d \
+./source/fsl_crc.d \
 ./source/semihost_hardfault.d 
 
 OBJS += \
+./source/Ethernet_CryptoCrc.o \
+./source/aes.o \
 ./source/cmsis_enet_txrx_transfer.o \
+./source/fsl_crc.o \
 ./source/semihost_hardfault.o 
 
 
@@ -28,7 +37,7 @@ source/%.o: ../source/%.c source/subdir.mk
 clean: clean-source
 
 clean-source:
-	-$(RM) ./source/cmsis_enet_txrx_transfer.d ./source/cmsis_enet_txrx_transfer.o ./source/semihost_hardfault.d ./source/semihost_hardfault.o
+	-$(RM) ./source/Ethernet_CryptoCrc.d ./source/Ethernet_CryptoCrc.o ./source/aes.d ./source/aes.o ./source/cmsis_enet_txrx_transfer.d ./source/cmsis_enet_txrx_transfer.o ./source/fsl_crc.d ./source/fsl_crc.o ./source/semihost_hardfault.d ./source/semihost_hardfault.o
 
 .PHONY: clean-source
 
