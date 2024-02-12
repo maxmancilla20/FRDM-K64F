@@ -1,4 +1,5 @@
 ../source/Ethernet_CryptoCrc.c:23:13:InitCrc32	32	static
 ../source/Ethernet_CryptoCrc.c:38:10:Get_CRC32	24	static
 ../source/Ethernet_CryptoCrc.c:62:11:EncryptMsg	16	static
-../source/Ethernet_CryptoCrc.c:73:8:Get_Msg_Lenght	4	static
+../source/Ethernet_CryptoCrc.c:73:11:DecryptMsgandCRC	24	static
+../source/Ethernet_CryptoCrc.c:93:8:Get_Msg_Lenght	4	static

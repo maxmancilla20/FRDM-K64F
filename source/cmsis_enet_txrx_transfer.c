@@ -137,16 +137,24 @@ static void ENET_BuildBroadCastFrame(void)
         PRINTF("0x%02x,", g_frame[count + 18] );
     }
     PRINTF("\r\n ---------------------CRC on Buffer----------------------------------.\r\n");
-    (void)Get_CRC32(1);/*Print obtained CRC*/
+
     /*32 bits CRC divided in 4 different bytes*/
-    g_frame[Get_Msg_Lenght() + 18] = (uint8_t)(Get_CRC32(0) >> 24);
-    g_frame[Get_Msg_Lenght() + 19] = (uint8_t)(Get_CRC32(0) >> 16);
-    g_frame[Get_Msg_Lenght() + 20] = (uint8_t)(Get_CRC32(0) >> 8);
-    g_frame[Get_Msg_Lenght() + 21] = (uint8_t)Get_CRC32(0);
+    uint32_t CRCObtained = Get_CRC32(0, Encrypted_Msg);
+    g_frame[Get_Msg_Lenght() + 18] = (uint8_t)(CRCObtained >> 24);
+    g_frame[Get_Msg_Lenght() + 19] = (uint8_t)(CRCObtained >> 16);
+    g_frame[Get_Msg_Lenght() + 20] = (uint8_t)(CRCObtained >> 8);
+    g_frame[Get_Msg_Lenght() + 21] = (uint8_t)CRCObtained;
     PRINTF("0x%02x,", g_frame[Get_Msg_Lenght() + 18] );
     PRINTF("0x%02x,", g_frame[Get_Msg_Lenght() + 19] );
     PRINTF("0x%02x,", g_frame[Get_Msg_Lenght() + 20] );
     PRINTF("0x%02x,", g_frame[Get_Msg_Lenght() + 21] );
+    (void)Get_CRC32(1, Encrypted_Msg);/*Print obtained CRC*/
+    //DecryptMsg();
+
+
+    uint8_t * Decrypted_Msg = DecryptMsgandCRC(Encrypted_Msg, CRCObtained);
+
+    
 }
 
 /*!

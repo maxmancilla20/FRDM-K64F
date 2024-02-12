@@ -35,7 +35,7 @@ static void InitCrc32(CRC_Type *base, uint32_t seed)
     CRC_Init(base, &config);
 }
 
-uint32_t Get_CRC32(uint8_t Option)
+uint32_t Get_CRC32(uint8_t Option, uint8_t * padded_msg_c)
 {
     CRC_Type *base = CRC0;
     static uint32_t CKSM;
@@ -44,7 +44,7 @@ uint32_t Get_CRC32(uint8_t Option)
     {
         case 0: /*Calculate CRC*/
             InitCrc32(base, 0xFFFFFFFFU);
-            CRC_WriteData(base, (uint8_t *)&padded_msg[0], padded_len);
+            CRC_WriteData(base, (uint8_t *)&padded_msg_c[0], padded_len);
             CKSM = CRC_Get32bitResult(base); 
         break;
         case 1: /*PRINT CRC*/
@@ -68,6 +68,26 @@ uint8_t * EncryptMsg(uint8_t * MyName)
 	AES_CBC_encrypt_buffer(&ctx, padded_msg, padded_len);
 
     return padded_msg;
+}
+
+uint8_t * DecryptMsgandCRC(uint8_t * Decrypt, uint32_t CRCBase)
+{   
+    uint32_t CRCCheck = Get_CRC32(0, Decrypt);
+
+    if(CRCCheck != CRCBase)
+    {
+        PRINTF("\r\nCRC NOT OK \r\n");
+    }
+    else
+    {   
+        PRINTF("\r\nCRC OK \r\n");
+        AES_init_ctx_iv(&ctx, key, iv);    
+        AES_CBC_decrypt_buffer(&ctx, Decrypt, padded_len);
+
+        PRINTF("\r\n DECRYPTED MSG \r\n");
+        PRINTF(Decrypt);
+        PRINTF("\r\n");
+    }
 }
 
 size_t Get_Msg_Lenght()

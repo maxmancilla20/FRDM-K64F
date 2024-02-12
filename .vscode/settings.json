@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "ethernet_cryptocrc.h": "c",
-        "aes.h": "c"
+        "aes.h": "c",
+        "fsl_debug_console.h": "c"
     }
 }

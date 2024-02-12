@@ -16,9 +16,10 @@
 
 
 static void InitCrc32(CRC_Type *, uint32_t);
-uint32_t Get_CRC32(uint8_t);
+uint32_t Get_CRC32(uint8_t, uint8_t *);
 uint8_t * EncryptMsg(uint8_t *);
 size_t Get_Msg_Lenght();
+uint8_t * DecryptMsgandCRC(uint8_t *, uint32_t);
 
 
 #endif /* ETHERNET_CRYPTOCRC_H_ */
