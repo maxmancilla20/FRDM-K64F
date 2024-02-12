@@ -80,11 +80,11 @@ uint8_t * DecryptMsgandCRC(uint8_t * Decrypt, uint32_t CRCBase)
     }
     else
     {   
-        PRINTF("\r\nCRC OK \r\n");
+        PRINTF("\r\nCRC OK");
         AES_init_ctx_iv(&ctx, key, iv);    
         AES_CBC_decrypt_buffer(&ctx, Decrypt, padded_len);
 
-        PRINTF("\r\n DECRYPTED MSG \r\n");
+        PRINTF("\r\nDECRYPTED MSG: ");
         PRINTF(Decrypt);
         PRINTF("\r\n");
     }
