@@ -3,6 +3,7 @@
 /*                                                  Includes                                                      */
 /*================================================================================================================*/
 #include "Ethernet_CryptoCrc.h"
+#include "string.h"
 
 /*================================================================================================================*/
 /*                                             Variable prototypes                                                */
@@ -13,6 +14,8 @@ struct AES_ctx ctx;
 size_t MyName_Len, padded_len;
 uint8_t padded_msg[512] = {0};
 uint8_t padded_msg_copy[512] = {0};
+
+char MsgtoSend[100] = "MAXIMILIANO MT";
 
 
 /*================================================================================================================*/
@@ -61,6 +64,7 @@ uint32_t Get_CRC32(uint8_t Option, uint8_t * padded_msg_c)
 
 uint8_t * EncryptMsg(uint8_t * MyName)
 {
+    memset(padded_msg, 0, sizeof(padded_msg));
     AES_init_ctx_iv(&ctx, key, iv);
 	MyName_Len = strlen(MyName);
 	padded_len = MyName_Len + (16 - (MyName_Len%16) );
@@ -93,4 +97,10 @@ uint8_t * DecryptMsgandCRC(uint8_t * Decrypt, uint32_t CRCBase)
 size_t Get_Msg_Lenght()
 {
     return padded_len;
+}
+
+void UpdateMsgtoSend(char* UpdatedString) {
+    memset(MsgtoSend, 0, sizeof(MsgtoSend));/*Clear String*/
+    strncpy(MsgtoSend, UpdatedString, sizeof(MsgtoSend) - 1);
+    MsgtoSend[sizeof(MsgtoSend) - 1] = '\0';  // Asegura la terminación nula
 }

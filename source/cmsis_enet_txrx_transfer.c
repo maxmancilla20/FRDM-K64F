@@ -100,24 +100,25 @@ void ENET_SignalEvent_t(uint32_t event)
         g_testTxNum++;
     }
 }
-
+//uint8_t MyName[100];
 /*! @brief Build Frame for transmit. */
 static void ENET_BuildBroadCastFrame(void)
 {
-    uint8_t MyName[] = "AABBCCDDEEFFAABBCCDDFF";
+    //MyName = "MAXIMILIANO_MT";
     uint32_t count  = 0;
     uint32_t length = ENET_DATA_LENGTH - 46;
 
+    memset(g_frame, 0, sizeof(g_frame));/*Clear Frame for a new request*/
     /*Msg to send*/
     PRINTF("\r\n ----------------------------RAW MESSAGE---------------------------------.\r\n");
 
     for(int i=0; i < 23; i++) {
-		PRINTF("0x%x,", MyName[i]);
+		PRINTF("0x%x,", MsgtoSend[i]);
 	}
     PRINTF("\r\n");
 
     /*Encrypt Msg*/
-    uint8_t * Encrypted_Msg = EncryptMsg(MyName);
+    uint8_t * Encrypted_Msg = EncryptMsg(MsgtoSend);
 
 
     /*Build Ethernet Buffer*/
@@ -211,12 +212,47 @@ int main(void)
 
     /* Build broadcast for sending. */
     ENET_BuildBroadCastFrame();
-
+    uint8_t FrameCnt = 0;
     while (1)
     {
         /* Check the total number of received number. */
         if (g_testTxNum && (g_txCheckIdx != g_testTxNum))
         {
+            switch(FrameCnt)
+            {
+                case 0:
+                    UpdateMsgtoSend("Hola este es el primer update");
+                    ENET_BuildBroadCastFrame();
+                    FrameCnt++;
+                break;
+                case 1:
+                    UpdateMsgtoSend("Hola este es el segundo update");
+                    ENET_BuildBroadCastFrame();
+                    FrameCnt++;
+                break;
+                case 2:
+                    UpdateMsgtoSend("Hola este es el tercer update");
+                    ENET_BuildBroadCastFrame();
+                    FrameCnt++;
+                break;
+                case 3:
+                    UpdateMsgtoSend("Hola este es el cuarto update");
+                    ENET_BuildBroadCastFrame();
+                    FrameCnt++;
+                break; 
+                case 4:
+                    UpdateMsgtoSend("Hola este es el quinto update");
+                    ENET_BuildBroadCastFrame();
+                    FrameCnt++;
+                break;  
+                case 5:
+                    UpdateMsgtoSend("Hola este es el sexto update");
+                    ENET_BuildBroadCastFrame();
+                    FrameCnt++;
+                break; 
+                default:
+                /*Do Nothing*/
+            }
             g_txCheckIdx = g_testTxNum;
             PRINTF("The %d frame transmitted success!\r\n", g_txCheckIdx);
         }
