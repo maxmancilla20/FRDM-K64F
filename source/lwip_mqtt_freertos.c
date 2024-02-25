@@ -37,6 +37,7 @@
 #include "fsl_phyksz8081.h"
 #include "fsl_enet_mdio.h"
 #include "fsl_device_registers.h"
+#include "Fire_Alarm\Fire_Alarm.h"
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -101,7 +102,7 @@
  ******************************************************************************/
 
 static void connect_to_mqtt(void *ctx);
-
+void publish_message(void *ctx);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -199,7 +200,7 @@ static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t f
  */
 static void mqtt_subscribe_topics(mqtt_client_t *client)
 {
-    static const char *topics[] = {"lwip_topic/#", "lwip_other/#"};
+    static const char *topics[] = {"lwip_topic/#", "lwip_other/#", "maximiliano_p2024/#"}; /*Here you can suscribe*/
     int qos[]                   = {0, 1};
     err_t err;
     int i;
@@ -301,11 +302,25 @@ static void mqtt_message_published_cb(void *arg, err_t err)
 /*!
  * @brief Publishes a message. To be called on tcpip_thread.
  */
-static void publish_message(void *ctx)
+void publish_message(void *ctx)
 {
-    static const char *topic   = "lwip_topic/100";
-    static const char *message = "message from board";
+    //uint8_t status = Get_Alarm_Status();
+    static const char *topic   = "maximiliano_p2024/lwip_topic/100";
+    static const char *message = "HOLA?";
+    
+    /*switch(status)
+    {
+        case 1:
+            //message = "HOLA 2?";
+        break;
+        case 2:
+            //message = "HOLA 3?";
+        break;
+        default:
+    }*/
 
+
+    //PRINTF(message);
     LWIP_UNUSED_ARG(ctx);
 
     PRINTF("Going to publish to the topic \"%s\"...\r\n", topic);
@@ -480,11 +495,16 @@ int main(void)
     BOARD_InitDebugConsole();
     /* Disable SYSMPU. */
     base->CESR &= ~SYSMPU_CESR_VLD_MASK;
-
+    LED_GREEN_INIT(LOGIC_LED_ON);
     /* Initialize lwIP from thread */
     if (sys_thread_new("main", stack_init, NULL, INIT_THREAD_STACKSIZE, INIT_THREAD_PRIO) == NULL)
     {
         LWIP_ASSERT("main(): Task creation failed.", 0);
+    }
+
+    if (sys_thread_new("Fire_Alarm_Monitor", Fire_Alarm_Monitor, NULL, INIT_THREAD_STACKSIZE, INIT_THREAD_PRIO) == NULL)
+    {
+        LWIP_ASSERT("Fire_Alarm_Monitor(): Task creation failed.", 0);
     }
 
     vTaskStartScheduler();

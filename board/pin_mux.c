@@ -163,6 +163,9 @@ void BOARD_InitPins(void)
 
                   /* UART 0 transmit data source select: UART0_TX pin. */
                   | SIM_SOPT5_UART0TXSRC(SOPT5_UART0TXSRC_UART_TX));
+
+    /* PORTB22 (pin 68) is configured as PTB22 */
+    PORT_SetPinMux(PORTB, 22U, kPORT_MuxAsGpio);
 }
 /***********************************************************************************************************************
  * EOF
