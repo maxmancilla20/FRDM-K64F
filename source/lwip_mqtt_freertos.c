@@ -200,7 +200,7 @@ static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t f
  */
 static void mqtt_subscribe_topics(mqtt_client_t *client)
 {
-    static const char *topics[] = {"lwip_topic/#", "lwip_other/#", "maximiliano_p2024/#"}; /*Here you can suscribe*/
+    static const char *topics[] = {/*"lwip_topic/#", "lwip_other/#",*/ "maximiliano_p2024/#"}; /*Here you can suscribe*/
     int qos[]                   = {0, 1};
     err_t err;
     int i;
@@ -304,20 +304,21 @@ static void mqtt_message_published_cb(void *arg, err_t err)
  */
 void publish_message(void *ctx)
 {
-    //uint8_t status = Get_Alarm_Status();
-    static const char *topic   = "maximiliano_p2024/lwip_topic/100";
+    uint8_t status = Get_Alarm_Status();
+    static const char *topic   = "maximiliano_p2024";
     static const char *message = "HOLA?";
     
-    /*switch(status)
+    switch(status)
     {
         case 1:
-            //message = "HOLA 2?";
+            message = "THE WOODS ARE HAPPY";
         break;
         case 2:
-            //message = "HOLA 3?";
+            message = "FIRE DETECTED!";
         break;
         default:
-    }*/
+            message = "SIGNAL LOST";
+    }
 
 
     //PRINTF(message);

@@ -56,10 +56,17 @@ uint8_t AlarmState = 1;
 void delay(void)
 {
     volatile uint32_t i = 0;
-    for (i = 0; i < 800000; ++i)
+    for (i = 0; i < 1600000; ++i)
     {
         __asm("NOP"); /* delay */
     }
+}
+
+uint8_t Get_Forest_Status(void)
+{
+    static uint8_t status;
+    
+    return status;
 }
 
 uint8_t Get_Alarm_Status(void)
@@ -72,26 +79,25 @@ uint8_t Get_Alarm_Status(void)
  */
 void Fire_Alarm_Monitor(void *arg)
 {
-    static char ALARM_NOT_OK[] = "FIRE DETECTED";
-    static char ALARM_OK[] = "THE WOODS ARE HAPPY";
 	LWIP_UNUSED_ARG(arg);
-    //Fire_Alarm_Init();
     /* Define the init structure for the output LED pin*/
     gpio_pin_config_t led_config = {
         kGPIO_DigitalOutput,
         0,
     };
-
-    /* Print a note to terminal. */
     
     /* Init output LED GPIO. */
     GPIO_PinInit(BOARD_LED_GPIO, BOARD_LED_GPIO_PIN, &led_config);
 
+    /*Loop Task*/
     while(1)
     {
-        //strcpy(AlarmState, ALARM_NOT_OK);
-        delay();
+        switch(GetForestStatus())
+        {
+
+        }
         delay();
         GPIO_PortToggle(BOARD_LED_GPIO, 1u << BOARD_LED_GPIO_PIN);
+        AlarmState = 2;
     }
 }
