@@ -62,12 +62,17 @@ void delay(void)
     }
 }
 
-uint8_t Get_Forest_Status(void)
+ void SaveLastData(const u8_t *data)
 {
-    static uint8_t status;
-    
-    return status;
+    AlarmState = *data;
 }
+
+/*uint8_t Get_Forest_Status(void)
+{
+    static uint8_t status = 0;
+
+    return status;
+}*/
 
 uint8_t Get_Alarm_Status(void)
 {
@@ -85,6 +90,10 @@ void Fire_Alarm_Monitor(void *arg)
         kGPIO_DigitalOutput,
         0,
     };
+    static uint32_t BlinkLed = 0;
+    int err;
+    static uint8_t SentFlag1 = 0;
+    static uint8_t SentFlag2 = 0;
     
     /* Init output LED GPIO. */
     GPIO_PinInit(BOARD_LED_GPIO, BOARD_LED_GPIO_PIN, &led_config);
@@ -92,12 +101,45 @@ void Fire_Alarm_Monitor(void *arg)
     /*Loop Task*/
     while(1)
     {
-        switch(GetForestStatus())
+        switch(AlarmState)
         {
+            case 49: /*49 = 1 in ASCII*/
+            if(SentFlag1 == 0)
+            {
+                err = tcpip_callback(publish_message, NULL);
+                if (err != ERR_OK)
+                {
+                    PRINTF("Failed to invoke publishing of a message on the tcpip_thread: %d.\r\n", err);
+                }
+            	GPIO_PortSet(BOARD_LED_GPIO, 1u << BOARD_LED_GPIO_PIN);
+                SentFlag1 = 1;
+                SentFlag2 = 0;
+            }
 
+            break;
+            case 50: /*50 = 2 in ASCII*/
+                //delay();
+                BlinkLed = (BlinkLed + 1) % (1600000 + 1);
+
+                if ( BlinkLed == 0 )
+                {
+                    GPIO_PortToggle(BOARD_LED_GPIO, 1u << BOARD_LED_GPIO_PIN);
+                }
+
+                if(SentFlag2 == 0)
+                {
+                    err = tcpip_callback(publish_message, NULL);
+                    if (err != ERR_OK)
+                    {
+                        PRINTF("Failed to invoke publishing of a message on the tcpip_thread: %d.\r\n", err);
+                    }
+                    SentFlag1 = 0;
+                    SentFlag2 = 1;
+                }
+            break;
+            default:
         }
-        delay();
-        GPIO_PortToggle(BOARD_LED_GPIO, 1u << BOARD_LED_GPIO_PIN);
-        AlarmState = 2;
+
+        //AlarmState = 2;
     }
 }

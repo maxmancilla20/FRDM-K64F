@@ -102,7 +102,7 @@
  ******************************************************************************/
 
 static void connect_to_mqtt(void *ctx);
-void publish_message(void *ctx);
+//void publish_message(void *ctx);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -176,7 +176,7 @@ static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t f
     int i;
 
     LWIP_UNUSED_ARG(arg);
-
+    SaveLastData(data);
     for (i = 0; i < len; i++)
     {
         if (isprint(data[i]))
@@ -310,10 +310,10 @@ void publish_message(void *ctx)
     
     switch(status)
     {
-        case 1:
+        case 49:
             message = "THE WOODS ARE HAPPY";
         break;
-        case 2:
+        case 50:
             message = "FIRE DETECTED!";
         break;
         default:
