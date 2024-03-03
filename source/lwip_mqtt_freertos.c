@@ -79,23 +79,6 @@
 #define EXAMPLE_NETIF_INIT_FN ethernetif0_init
 #endif /* EXAMPLE_NETIF_INIT_FN */
 
-/*! @brief MQTT server host name or IP address. */
-#define EXAMPLE_MQTT_SERVER_HOST "broker.hivemq.com"
-
-/*! @brief MQTT server port number. */
-#define EXAMPLE_MQTT_SERVER_PORT 1883
-
-/*! @brief Stack size of the temporary lwIP initialization thread. */
-#define INIT_THREAD_STACKSIZE 1024
-
-/*! @brief Priority of the temporary lwIP initialization thread. */
-#define INIT_THREAD_PRIO DEFAULT_THREAD_PRIO
-
-/*! @brief Stack size of the temporary initialization thread. */
-#define APP_THREAD_STACKSIZE 1024
-
-/*! @brief Priority of the temporary initialization thread. */
-#define APP_THREAD_PRIO DEFAULT_THREAD_PRIO
 
 /*******************************************************************************
  * Prototypes
@@ -164,7 +147,7 @@ static void mqtt_topic_subscribed_cb(void *arg, err_t err)
 static void mqtt_incoming_publish_cb(void *arg, const char *topic, u32_t tot_len)
 {
     LWIP_UNUSED_ARG(arg);
-
+    SaveLastData(NULL, 1, topic);
     PRINTF("Received %u bytes from the topic \"%s\": \"", tot_len, topic);
 }
 
@@ -176,7 +159,7 @@ static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t f
     int i;
 
     LWIP_UNUSED_ARG(arg);
-    SaveLastData(data);
+    SaveLastData(data, 0, NULL);
     for (i = 0; i < len; i++)
     {
         if (isprint(data[i]))
@@ -200,7 +183,7 @@ static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t f
  */
 static void mqtt_subscribe_topics(mqtt_client_t *client)
 {
-    static const char *topics[] = {/*"lwip_topic/#", "lwip_other/#",*/ "maximiliano_p2024/#"}; /*Here you can suscribe*/
+    static const char *topics[] = {/*"lwip_topic/#", "lwip_other/#",*/ "maximiliano_p2024/power", "maximiliano_p2024/manual"}; /*Here you can suscribe*/
     int qos[]                   = {0, 1};
     err_t err;
     int i;
@@ -305,27 +288,35 @@ static void mqtt_message_published_cb(void *arg, err_t err)
 void publish_message(void *ctx)
 {
     uint8_t status = Get_Alarm_Status();
-    static const char *topic   = "maximiliano_p2024";
-    static const char *message = "HOLA?";
+    static char *topic   = "maximiliano_p2024";
+    static char *message = "INIT MSG";
+    static uint8_t state_machine_id = 1;
     
-    switch(status)
+    switch(state_machine_id)
     {
-        case 49:
-            message = "THE WOODS ARE HAPPY";
-        break;
-        case 50:
-            message = "FIRE DETECTED!";
-        break;
+        case 1: 
+            topic = "maximiliano_p2024/temp";
+            message = Get_Temp_Msg();
+            state_machine_id = 2;
+            break;
+        case 2:
+            topic = "maximiliano_p2024/humidity";
+            message = Get_Humidity_Msg();
+            state_machine_id = 3;
+            break;
+        case 3:
+            topic = "maximiliano_p2024/image";
+            message = Get_Image_Msg();
+            state_machine_id = 1;
+            break;
         default:
-            message = "SIGNAL LOST";
+        /*Reset state.*/
+        state_machine_id = 1;
     }
 
-
-    //PRINTF(message);
     LWIP_UNUSED_ARG(ctx);
 
     PRINTF("Going to publish to the topic \"%s\"...\r\n", topic);
-
     mqtt_publish(mqtt_client, topic, message, strlen(message), 1, 0, mqtt_message_published_cb, (void *)topic);
 }
 
@@ -407,6 +398,11 @@ static void app_thread(void *arg)
         }
 
         sys_msleep(1000U);
+    }
+
+    if (sys_thread_new("InitMonitoringSys", InitMonitoringSys, NULL, INIT_THREAD_STACKSIZE, INIT_THREAD_PRIO) == NULL)
+    {
+        LWIP_ASSERT("InitMonitoringSys(): Task creation failed.", 0);
     }
 
     vTaskDelete(NULL);
@@ -501,13 +497,7 @@ int main(void)
     if (sys_thread_new("main", stack_init, NULL, INIT_THREAD_STACKSIZE, INIT_THREAD_PRIO) == NULL)
     {
         LWIP_ASSERT("main(): Task creation failed.", 0);
-    }
-
-    if (sys_thread_new("Fire_Alarm_Monitor", Fire_Alarm_Monitor, NULL, INIT_THREAD_STACKSIZE, INIT_THREAD_PRIO) == NULL)
-    {
-        LWIP_ASSERT("Fire_Alarm_Monitor(): Task creation failed.", 0);
-    }
-
+    } 
     vTaskStartScheduler();
 
     /* Will not get here unless a task calls vTaskEndScheduler ()*/
