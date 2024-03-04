@@ -291,6 +291,7 @@ void publish_message(void *ctx)
     static char *message = "INIT MSG";
     static uint8_t state_machine_id = 1;
     
+    /*STATE MACHINE OF MQTT PUBLISH MESSAGE.*/
     switch(state_machine_id)
     {
         case 1: 

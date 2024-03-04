@@ -4,43 +4,8 @@
  *  Created on: 17 feb. 2024
  *      Author: USER
  */
-#include "pin_mux.h"
-#include "clock_config.h"
-#include "board.h"
-#include "fsl_debug_console.h"
-#include "fsl_gpio.h"
-#include "Fire_Alarm\Fire_Alarm.h"
-#include "pin_mux.h"
-#include "clock_config.h"
-#include "board.h"
-#include "fsl_phy.h"
-
-#include "lwip/api.h"
-#include "lwip/apps/mqtt.h"
-#include "lwip/dhcp.h"
-#include "lwip/netdb.h"
-#include "lwip/netifapi.h"
-#include "lwip/prot/dhcp.h"
-#include "lwip/tcpip.h"
-#include "lwip/timeouts.h"
-#include "netif/ethernet.h"
-#include "enet_ethernetif.h"
-#include "lwip_mqtt_id.h"
-
-#include "ctype.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "fsl_phyksz8081.h"
-#include "fsl_enet_mdio.h"
-#include "fsl_device_registers.h"
-
-#include "FreeRTOS.h"
-#include "task.h"
-#include "lwip/opt.h"
-#include "lwip/sys.h"
-#include <time.h>
+#include "Fire_Alarm.h"
+//#include "Fire_Alarm\Fire_Alarm.h"
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -53,7 +18,7 @@
 /*!
  * @brief delay a while.
  */
-void delay(void);
+
 uint8_t AlarmState = 1;
 static uint8_t Emergency = 0;
 static uint8_t ManualState = 0;
@@ -70,31 +35,24 @@ TaskHandle_t FireAlarmMonitor_Handle = NULL;
 /*******************************************************************************
  * Code
  ******************************************************************************/
-void delay(void)
-{
-    volatile uint32_t i = 0;
-    for (i = 0; i < 1600000; ++i)
-    {
-        __asm("NOP"); /* delay */
-    }
-}
 
  void SaveLastData(const u8_t *data, uint8_t operation, const char *topic)
 { 
+
+    /*
+        OPERATION 1 = INDICATE THAT WE RECEIVE SOMETHING
+        OPERATION 0 = USED AFTER OPERATION 1 RECEIVED. THIS OPERATION STORES THE RECEIVED DATA.  
+    */
     static uint8_t PowerFlag = 0;
     static uint8_t ManualFlag = 0;
 
-    /* Define the init structure for the output LED pin*/
-    
-    /* Init output LED GPIO. */
-
     if((1 == operation) && (0 == strcmp("maximiliano_p2024/power", topic)))
     {
-        PowerFlag = 1;
+        PowerFlag = 1;/*Flag that indicates that we receive something from power topic*/
     }
     else if((1 == operation) && (0 == strcmp("maximiliano_p2024/manual", topic)))
     {
-        ManualFlag = 1;
+        ManualFlag = 1;/*Flag that indicates that we receive something from manual topic*/
     }
     else
     {
@@ -105,15 +63,17 @@ void delay(void)
     {
         AlarmState = *data;
         PowerFlag = 0;
-        PRINTF("POWER FLAG CHANGED TO %d\n", *data);
+        
         if(48 == AlarmState)
-        {
+        {   
+            PRINTF("POWER OFF");
             vTaskSuspend(FireAlarmMonitor_Handle);
             vTaskSuspend(FireAlarmActivated_Handle);
             GPIO_PortSet(BOARD_LED_GPIO, 1u << BOARD_LED_GPIO_PIN);
         }
         else
         {
+            PRINTF("POWER ON");
             vTaskResume(MQTTPublisher_Handle);
             vTaskResume(FireAlarmMonitor_Handle);
             vTaskResume(FireAlarmActivated_Handle);
@@ -130,12 +90,9 @@ void delay(void)
     }
 }
 
-
-/*!
- * @brief Main function
- */
 void InitMonitoringSys(void *arg)/*Task0*/
 {   
+    /* TASK CREATED AFTER "app_thread" FINISHED TO INITIALIZE MQTT, THIS TASK INITIALIZES THE SYSTEM*/
     LWIP_UNUSED_ARG(arg);
 
     /* MQTT Publisher Task Creation */
@@ -180,18 +137,19 @@ void InitMonitoringSys(void *arg)/*Task0*/
 
 void MQTTPublisher(void *arg)/*TASK 1*/
 {
+    /*MAIN TASK, THIS TASK CALLS publish_message THAT PUBLISH ALL THE NECESSARY TOPICS*/
 	LWIP_UNUSED_ARG(arg);
     int err;
     /*Loop Task*/
     while(1)
     {
-        static uint8_t ShutDownCnt = 0;
+        static uint8_t ShutDownCnt = 0; /*FLAG USED TO LET THE SYSTEM SET ALL IN CERO BEFORE IT WILL BE TURNED OFF*/
         err = tcpip_callback(publish_message, NULL);
         if (err != ERR_OK)
         {
             PRINTF("Failed to invoke publishing of a message on the tcpip_thread: %d.\r\n", err);
         }
-        if(48 == AlarmState)
+        if(48 == AlarmState)/*48 = "0" IN ASCII*/
         {  
             if(5 < ShutDownCnt)
             {
@@ -216,6 +174,8 @@ void Fire_Alarm_Monitor(void *arg)/*TASK 2*/
 {   
     LWIP_UNUSED_ARG(arg);
 
+    /*TASK USED TO MONITOR TEMPERATURE AND HUMIDITY AND DETERMINE IF THERES A FIRE EMERGENCY IN THE FOREST*/
+    /*ALSO IF THE ALARM WAS ACTIVATED MANUALLY IT ACTIVATES THE ACTUATORS OF THE ALARM*/
     static uint8_t Last_Temp_Val = 0;
     static uint8_t Last_Humidity_Val = 0;
 
@@ -225,11 +185,13 @@ void Fire_Alarm_Monitor(void *arg)/*TASK 2*/
         Last_Humidity_Val = atoi(Get_Humidity_Msg());
         if( (( 80 <= Last_Temp_Val) && (20 >= Last_Humidity_Val)) || (49 == ManualState) )
         {
+            /*EMERGENCY IN PROGRESS*/
             Emergency = 1;
             vTaskResume(FireAlarmActivated_Handle);
         }
         else
         {   
+            /*NO EMERGENCY DETECTED*/
             Emergency = 0;
             vTaskSuspend(FireAlarmActivated_Handle);
             GPIO_PortSet(BOARD_LED_GPIO, 1u << BOARD_LED_GPIO_PIN);
@@ -241,6 +203,7 @@ void Fire_Alarm_Monitor(void *arg)/*TASK 2*/
 
 void FireAlarmActivated(void *arg)/*TASK 3*/
 {           
+    /*THIS IS THE "DRIVER" OR ACTUATOR OF THE ALARM. IF THIS TASK IS RUNNING IT WILL TOGGLE A RED LED THAT INDICATES THE EMERGENCY.*/
     LWIP_UNUSED_ARG(arg);
     vTaskSuspend(FireAlarmActivated_Handle);
 
@@ -253,45 +216,41 @@ void FireAlarmActivated(void *arg)/*TASK 3*/
 
 char* Get_Temp_Msg(void) 
 {
+    /*API USED TO RETURN THE TEMPERATURE VALUE. IT READS THE "SENSORS" AND DISCARDS THE TEMPERATURE READING IF THE POWER IS OFF*/
     if (48 == AlarmState) {
-        // Handle the case when AlarmState is 48
         return "0";
     } else {
-        // Call TempSimulation and return the pointer to the static buffer
+        /* Call TempSimulation and return the pointer to the static buffer*/
         return TempSimulation();
     }
 }
 
 char* Get_Humidity_Msg(void)
 {
-    static char HumidityMsg[4];
-
-    if(48 == AlarmState)
-    {
+    /*API USED TO RETURN THE HUMIDITY VALUE. IT READS THE "SENSORS" AND DISCARDS THE HUMIDITY READING IF THE POWER IS OFF*/   
+    if(48 == AlarmState){
         return "0";
-    }
-    else
-    {
+    }else{
         return HumiditySimulation();
     }
-    
-    return HumidityMsg;
 }
 
 char* Get_Image_Msg(void)
 {
+    /* "CAMERA CONNECTION", IT SHOWS A VISUAL STATE OF THE FOREST.*/
     static char ImageMsg[200];
     memset(ImageMsg, '\0', sizeof(ImageMsg));
 
-    // Check the state of the task
     if(48 == AlarmState)
-    {
+    {   
+        /*IF THE POWER IS OFF. SHOW A DISCONNECTION IMAGE*/
         strcpy(ImageMsg, "https://allthings.how/content/images/wordpress/2021/07/allthings.how-how-to-shutdown-a-windows-11-pc-shut-down-computer.png");
     }
     else
     {
         if((1 == Emergency) || (49 == ManualState))
         {
+            /*IF A FIRE EMERGENCY IS DETECTED OR THE MANUAL ACTIAVTION IS SET. SHOWS THE STATE OF THE FOREST IN FIRE.*/
             strcpy(ImageMsg, "https://www.treehugger.com/thmb/i3riIyXip9Qg6iCJKi_ukf8C9hI=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/elkfire-56af58b45f9b58b7d017af72.jpg");
         }
         else
@@ -300,117 +259,5 @@ char* Get_Image_Msg(void)
         }
     }
     return ImageMsg;
-}
-
-char* TempSimulation(void) {
-        static char temperatureString[100];  // Maximum length adjusted to 100
-
-    // Generate a controlled change in temperature
-    static int currentTemperature = 15;  // Start at 16
-    static int counter = 0;  // Counter to track consecutive calls
-    static int increment = 2;  // Increment value during the gradual change
-    static uint8_t IncrementFlag = 1;
-    static uint8_t DecrementFlag = 0;
-    // Gradual increment to reach 85
-    if ((currentTemperature <= 85) && (1 == IncrementFlag)) 
-    {
-        currentTemperature += increment;
-    } 
-    else if ((currentTemperature >= 85) && (1 == IncrementFlag) && (5 >= counter))
-    {
-        // Hold at 85 for 5 calls
-        counter++;
-    }
-    else if((currentTemperature >= 85) && (1 == IncrementFlag) && (5 <= counter))
-    {
-        /*Changing context to decrement.*/
-        IncrementFlag = 0;
-        DecrementFlag = 1;
-        counter = 0;
-    }
-    else if ((currentTemperature >= 15) && (1 == DecrementFlag) ) 
-    {
-        // Gradual decrement to 15
-        currentTemperature -= increment;
-    }
-    else if((currentTemperature <= 15) && (1 == DecrementFlag) && (5 >= counter))  
-    {   
-        // Hold at 85 for 5 calls
-        counter++;
-    }
-    else if ((currentTemperature <= 15) && (1 == DecrementFlag) && (5 <= counter))
-    {
-        // Reset counters and cycle
-        IncrementFlag = 1;
-        DecrementFlag = 0;
-        counter = 0;
-    }
-    else
-    {
-        /*nothing*/
-    }
-
-    // Convert the integer temperature to a string using snprintf
-    int charsWritten = snprintf(temperatureString, sizeof(temperatureString), "%d", currentTemperature);
-
-    // Return the pointer to the static buffer
-    return temperatureString;
-}
-
-char* HumiditySimulation(void)
-{
-    static char humidityString[100];  // Maximum length adjusted to 100
-
-    // Generate a controlled change in humidity
-    static int currentHumidity = 85;  // Start at 15
-    static int counter = 0;  // Counter to track consecutive calls
-    static int increment = 2;  // Increment value during the gradual change
-    static uint8_t incrementFlag = 0;
-    static uint8_t decrementFlag = 1;
-
-    // Gradual increment to reach 85
-    if ((currentHumidity <= 85) && (1 == incrementFlag)) 
-    {
-        currentHumidity += increment;
-    } 
-    else if ((currentHumidity >= 85) && (1 == incrementFlag) && (5 >= counter))
-    {
-        // Hold at 85 for 5 calls
-        counter++;
-    }
-    else if((currentHumidity >= 85) && (1 == incrementFlag) && (5 <= counter))
-    {
-        /* Changing context to decrement. */
-        incrementFlag = 0;
-        decrementFlag = 1;
-        counter = 0;
-    }
-    else if ((currentHumidity >= 15) && (1 == decrementFlag)) 
-    {
-        // Gradual decrement to 15
-        currentHumidity -= increment;
-    }
-    else if((currentHumidity <= 15) && (1 == decrementFlag) && (5 >= counter))  
-    {   
-        // Hold at 15 for 5 calls
-        counter++;
-    }
-    else if ((currentHumidity <= 15) && (1 == decrementFlag) && (5 <= counter))
-    {
-        // Reset counters and cycle
-        incrementFlag = 1;
-        decrementFlag = 0;
-        counter = 0;
-    }
-    else
-    {
-        /* Nothing */
-    }
-
-    // Convert the integer humidity to a string using snprintf
-    int charsWritten = snprintf(humidityString, sizeof(humidityString), "%d", currentHumidity);
-
-    // Return the pointer to the static buffer
-    return humidityString;
 }
  

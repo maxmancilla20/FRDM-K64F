@@ -8,6 +8,47 @@
 #ifndef FIRE_ALARM_FIRE_ALARM_H_
 #define FIRE_ALARM_FIRE_ALARM_H_
 
+
+#include "pin_mux.h"
+#include "clock_config.h"
+#include "board.h"
+#include "fsl_debug_console.h"
+#include "fsl_gpio.h"
+#include "pin_mux.h"
+#include "clock_config.h"
+#include "board.h"
+#include "fsl_phy.h"
+
+#include "lwip/api.h"
+#include "lwip/apps/mqtt.h"
+#include "lwip/dhcp.h"
+#include "lwip/netdb.h"
+#include "lwip/netifapi.h"
+#include "lwip/prot/dhcp.h"
+#include "lwip/tcpip.h"
+#include "lwip/timeouts.h"
+#include "netif/ethernet.h"
+#include "enet_ethernetif.h"
+#include "lwip_mqtt_id.h"
+
+#include "ctype.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "fsl_phyksz8081.h"
+#include "fsl_enet_mdio.h"
+#include "fsl_device_registers.h"
+
+#include "FreeRTOS.h"
+#include "task.h"
+#include "lwip/opt.h"
+#include "lwip/sys.h"
+#include <time.h>
+
+#include "HumidiySensor.h"
+#include "TempSensor.h"
+
 typedef uint8_t   u8_t;
 #define MAX_VALUE 0xFFFFFFFFu
 
@@ -41,7 +82,6 @@ void publish_message(void *ctx);
 char* Get_Temp_Msg(void);
 char* Get_Humidity_Msg(void);
 char* Get_Image_Msg(void);
-char* TempSimulation(void);
-char* HumiditySimulation(void);
+
 
 #endif /* FIRE_ALARM_FIRE_ALARM_H_ */
