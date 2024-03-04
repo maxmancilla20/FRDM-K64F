@@ -36,11 +36,12 @@ void Fire_Alarm_Monitor(void *);
 void FireAlarmActivated(void *);
 void MQTTPublisher(void *);
 void InitMonitoringSys(void *);
-uint8_t Get_Alarm_Status(void);
 void SaveLastData(const u8_t *, uint8_t, const char *);
 void publish_message(void *ctx);
 char* Get_Temp_Msg(void);
 char* Get_Humidity_Msg(void);
 char* Get_Image_Msg(void);
+char* TempSimulation(void);
+char* HumiditySimulation(void);
 
 #endif /* FIRE_ALARM_FIRE_ALARM_H_ */

@@ -28,7 +28,8 @@
 #include "lwip_mqtt_id.h"
 
 #include "ctype.h"
-#include "stdio.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "fsl_phyksz8081.h"
@@ -39,6 +40,7 @@
 #include "task.h"
 #include "lwip/opt.h"
 #include "lwip/sys.h"
+#include <time.h>
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -128,10 +130,6 @@ void delay(void)
     }
 }
 
-uint8_t Get_Alarm_Status(void)
-{
-    return AlarmState;
-}
 
 /*!
  * @brief Main function
@@ -253,21 +251,15 @@ void FireAlarmActivated(void *arg)/*TASK 3*/
     }
 }
 
-char* Get_Temp_Msg(void)
+char* Get_Temp_Msg(void) 
 {
-    static char TempMsg[4];
-    static uint8_t NumericTemp = 0;
-
-    if(48 == AlarmState)
-    {
-        strcpy(TempMsg, "0");
+    if (48 == AlarmState) {
+        // Handle the case when AlarmState is 48
+        return "0";
+    } else {
+        // Call TempSimulation and return the pointer to the static buffer
+        return TempSimulation();
     }
-    else
-    {
-        strcpy(TempMsg, "95");
-    }
-     
-    return TempMsg;
 }
 
 char* Get_Humidity_Msg(void)
@@ -276,11 +268,11 @@ char* Get_Humidity_Msg(void)
 
     if(48 == AlarmState)
     {
-        strcpy(HumidityMsg, "0");
+        return "0";
     }
     else
     {
-        strcpy(HumidityMsg, "60");
+        return HumiditySimulation();
     }
     
     return HumidityMsg;
@@ -310,5 +302,115 @@ char* Get_Image_Msg(void)
     return ImageMsg;
 }
 
+char* TempSimulation(void) {
+        static char temperatureString[100];  // Maximum length adjusted to 100
 
+    // Generate a controlled change in temperature
+    static int currentTemperature = 15;  // Start at 16
+    static int counter = 0;  // Counter to track consecutive calls
+    static int increment = 2;  // Increment value during the gradual change
+    static uint8_t IncrementFlag = 1;
+    static uint8_t DecrementFlag = 0;
+    // Gradual increment to reach 85
+    if ((currentTemperature <= 85) && (1 == IncrementFlag)) 
+    {
+        currentTemperature += increment;
+    } 
+    else if ((currentTemperature >= 85) && (1 == IncrementFlag) && (5 >= counter))
+    {
+        // Hold at 85 for 5 calls
+        counter++;
+    }
+    else if((currentTemperature >= 85) && (1 == IncrementFlag) && (5 <= counter))
+    {
+        /*Changing context to decrement.*/
+        IncrementFlag = 0;
+        DecrementFlag = 1;
+        counter = 0;
+    }
+    else if ((currentTemperature >= 15) && (1 == DecrementFlag) ) 
+    {
+        // Gradual decrement to 15
+        currentTemperature -= increment;
+    }
+    else if((currentTemperature <= 15) && (1 == DecrementFlag) && (5 >= counter))  
+    {   
+        // Hold at 85 for 5 calls
+        counter++;
+    }
+    else if ((currentTemperature <= 15) && (1 == DecrementFlag) && (5 <= counter))
+    {
+        // Reset counters and cycle
+        IncrementFlag = 1;
+        DecrementFlag = 0;
+        counter = 0;
+    }
+    else
+    {
+        /*nothing*/
+    }
+
+    // Convert the integer temperature to a string using snprintf
+    int charsWritten = snprintf(temperatureString, sizeof(temperatureString), "%d", currentTemperature);
+
+    // Return the pointer to the static buffer
+    return temperatureString;
+}
+
+char* HumiditySimulation(void)
+{
+    static char humidityString[100];  // Maximum length adjusted to 100
+
+    // Generate a controlled change in humidity
+    static int currentHumidity = 85;  // Start at 15
+    static int counter = 0;  // Counter to track consecutive calls
+    static int increment = 2;  // Increment value during the gradual change
+    static uint8_t incrementFlag = 0;
+    static uint8_t decrementFlag = 1;
+
+    // Gradual increment to reach 85
+    if ((currentHumidity <= 85) && (1 == incrementFlag)) 
+    {
+        currentHumidity += increment;
+    } 
+    else if ((currentHumidity >= 85) && (1 == incrementFlag) && (5 >= counter))
+    {
+        // Hold at 85 for 5 calls
+        counter++;
+    }
+    else if((currentHumidity >= 85) && (1 == incrementFlag) && (5 <= counter))
+    {
+        /* Changing context to decrement. */
+        incrementFlag = 0;
+        decrementFlag = 1;
+        counter = 0;
+    }
+    else if ((currentHumidity >= 15) && (1 == decrementFlag)) 
+    {
+        // Gradual decrement to 15
+        currentHumidity -= increment;
+    }
+    else if((currentHumidity <= 15) && (1 == decrementFlag) && (5 >= counter))  
+    {   
+        // Hold at 15 for 5 calls
+        counter++;
+    }
+    else if ((currentHumidity <= 15) && (1 == decrementFlag) && (5 <= counter))
+    {
+        // Reset counters and cycle
+        incrementFlag = 1;
+        decrementFlag = 0;
+        counter = 0;
+    }
+    else
+    {
+        /* Nothing */
+    }
+
+    // Convert the integer humidity to a string using snprintf
+    int charsWritten = snprintf(humidityString, sizeof(humidityString), "%d", currentHumidity);
+
+    // Return the pointer to the static buffer
+    return humidityString;
+}
  

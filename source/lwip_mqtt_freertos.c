@@ -287,7 +287,6 @@ static void mqtt_message_published_cb(void *arg, err_t err)
  */
 void publish_message(void *ctx)
 {
-    uint8_t status = Get_Alarm_Status();
     static char *topic   = "maximiliano_p2024";
     static char *message = "INIT MSG";
     static uint8_t state_machine_id = 1;
