@@ -1,0 +1,5 @@
+C:\Users\USER\Documents\MCUXpressoIDE_11.8.0_1165\workspace\frdmk64f_cmsis_enet_txrx_transfer\drivers/fsl_sysmpu.h:268:20:SYSMPU_Enable	16	static
+../source/cmsis_enet_txrx_transfer.c:60:10:ENET0_GetFreq	8	static
+../source/cmsis_enet_txrx_transfer.c:65:6:ENET_SignalEvent_t	32	static
+../source/cmsis_enet_txrx_transfer.c:101:13:ENET_BuildBroadCastFrame	16	static
+../source/cmsis_enet_txrx_transfer.c:123:5:main	16	static
