@@ -1,0 +1,13 @@
+C:\Users\USER\Documents\MCUXpressoIDE_11.8.0_1165\workspace\frdmk64f_freertos_queue_Queue_2\CMSIS/core_cm4.h:1679:22:__NVIC_EnableIRQ	16	static
+C:\Users\USER\Documents\MCUXpressoIDE_11.8.0_1165\workspace\frdmk64f_freertos_queue_Queue_2\CMSIS/core_cm4.h:1809:22:__NVIC_SetPriority	16	static
+C:\Users\USER\Documents\MCUXpressoIDE_11.8.0_1165\workspace\frdmk64f_freertos_queue_Queue_2\CMSIS/core_cm4.h:1831:26:__NVIC_GetPriority	16	static
+C:\Users\USER\Documents\MCUXpressoIDE_11.8.0_1165\workspace\frdmk64f_freertos_queue_Queue_2\drivers/fsl_common_arm.h:499:24:EnableIRQ	24	static
+C:\Users\USER\Documents\MCUXpressoIDE_11.8.0_1165\workspace\frdmk64f_freertos_queue_Queue_2\drivers/fsl_gpio.h:191:20:GPIO_PortSet	16	static
+C:\Users\USER\Documents\MCUXpressoIDE_11.8.0_1165\workspace\frdmk64f_freertos_queue_Queue_2\drivers/fsl_gpio.h:206:20:GPIO_PortClear	16	static
+C:\Users\USER\Documents\MCUXpressoIDE_11.8.0_1165\workspace\frdmk64f_freertos_queue_Queue_2\drivers/fsl_port.h:374:20:PORT_SetPinMux	24	static
+C:\Users\USER\Documents\MCUXpressoIDE_11.8.0_1165\workspace\frdmk64f_freertos_queue_Queue_2\drivers/fsl_port.h:443:20:PORT_SetPinInterruptConfig	24	static
+../source/LedSws_Drivers_Init.c:46:6:SwitchLed_Init	8	static
+../source/LedSws_Drivers_Init.c:83:6:UpAdc	4	static
+../source/LedSws_Drivers_Init.c:90:6:DownAdc	4	static
+../source/LedSws_Drivers_Init.c:98:10:Get_ADC_Val	4	static
+../source/LedSws_Drivers_Init.c:103:6:LedUpdate	16	static

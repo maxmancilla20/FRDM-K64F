@@ -1,6 +1,7 @@
 {
     "files.associations": {
-        "functions.h": "c",
-        "fsl_debug_console.h": "c"
+        "ledsws_drivers_init.h": "c",
+        "cmath": "c",
+        "timers.h": "c"
     }
 }

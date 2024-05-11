@@ -1,0 +1,10 @@
+C:\Users\USER\Documents\MCUXpressoIDE_11.8.0_1165\workspace\frdmk64f_freertos_queue_Queue_2\CMSIS/core_cm4.h:1679:22:__NVIC_EnableIRQ	16	static
+C:\Users\USER\Documents\MCUXpressoIDE_11.8.0_1165\workspace\frdmk64f_freertos_queue_Queue_2\drivers/fsl_common_arm.h:499:24:EnableIRQ	24	static
+C:\Users\USER\Documents\MCUXpressoIDE_11.8.0_1165\workspace\frdmk64f_freertos_queue_Queue_2\drivers/fsl_flexcan.h:1482:24:FLEXCAN_GetMbStatusFlags	16	static
+C:\Users\USER\Documents\MCUXpressoIDE_11.8.0_1165\workspace\frdmk64f_freertos_queue_Queue_2\drivers/fsl_flexcan.h:1504:20:FLEXCAN_ClearMbStatusFlags	16	static
+C:\Users\USER\Documents\MCUXpressoIDE_11.8.0_1165\workspace\frdmk64f_freertos_queue_Queue_2\drivers/fsl_flexcan.h:1674:20:FLEXCAN_EnableMbInterrupts	16	static
+../source/CAN.c:58:6:CAN0_ORed_Message_buffer_IRQHandler	16	static
+../source/CAN.c:97:6:CAN_Init	64	static
+../source/CAN.c:258:6:Send_CAN_ADC	16	static
+../source/CAN.c:267:6:log_init	24	static
+../source/CAN.c:281:13:log_task	32	static
